@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 4: RAG &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 1 &middot; Fundamentals of LLMs, Context Engineering &amp; RAG</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-04-rag-content.html">Lesson content</a>
+  <a class="" href="week-04-rag-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-03-context-engineering-ii-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 3: Context Engineering II</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 4: RAG</span></span>
+<span class="step next disabled"><span class="tag">Next &rarr;</span><span class="label">Week 5: Exam &mdash; Corte 1 Practical Project (not covered in these materials)</span></span>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    <div class="box">
+  <h2>Notebook</h2>
+  <ul><li><a href="../notebooks/week-04-rag.ipynb" target="_blank" rel="noopener">Open week 04 Jupyter notebook &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 1 &middot; Week 4 of 16</p>
+    <h1 class="lesson-title">Retrieval-Augmented Generation (RAG)</h1>
+    <p class="lesson-lede">RAG architecture, chunking strategies, ChromaDB and FAISS, and building a complete, functional RAG system.</p>
+    
+<div class="card objectives">
+  <h3>Learning objectives</h3>
+  <ul>
+    <li>Describe the four stages of a RAG pipeline: ingestion, indexing, retrieval, and generation.</li>
+    <li>Choose and implement a chunking strategy appropriate for a given document type.</li>
+    <li>Store and query embeddings using a real vector store (ChromaDB) and understand when FAISS is the better fit.</li>
+    <li>Build a complete, functional RAG system end to end: documents in, grounded answers out.</li>
+    <li>Connect this week's system directly to your Corte 1 project, due next week.</li>
+  </ul>
+</div>
+
+<h2>1. From Semantic Search to RAG</h2>
+<p>
+Last week you built a minimal semantic search function: embed some candidate texts, embed a query, rank by
+cosine similarity. <strong>Retrieval-Augmented Generation (RAG)</strong> is that exact idea, formalized into a
+production pattern with one addition: instead of just <em>returning</em> the best-matching text, you
+<strong>feed it into the model's context</strong> so the model can generate an answer grounded in it (Lewis et
+al., 2020 &mdash; see Further Reading).
+</p>
+<p>
+RAG solves a problem no amount of prompt engineering can: an LLM only knows what was in its training data (plus
+whatever you put in the prompt). RAG lets it answer questions about <em>your</em> documents &mdash; a course
+syllabus, a product manual, your own notes &mdash; without retraining anything.
+</p>
+
+<h2>2. RAG Architecture: Four Stages</h2>
+<figure class="diagram"><svg viewBox="0 0 860 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1. The four stages of a RAG pipeline. Ingestion and indexing happen once (or on document updates); retrieval and generation happen on every query."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">1. Ingestion</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">load raw documents</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">2. Indexing</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">chunk → embed → store</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">3. Retrieval</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">embed query → similarity search</text><line x1="624" y1="52.0" x2="668" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="668" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="754.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">4. Generation</text><text x="754.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">augmented prompt → LLM answer</text></svg><figcaption>Figure 1. The four stages of a RAG pipeline. Ingestion and indexing happen once (or on document updates); retrieval and generation happen on every query.</figcaption></figure>
+<table>
+  <thead><tr><th>Stage</th><th>What happens</th><th>When it runs</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Ingestion</strong></td><td>Load raw source documents (PDFs, markdown, web pages, plain text) into memory.</td><td>Once per document, or whenever documents change.</td></tr>
+    <tr><td><strong>Indexing</strong></td><td>Split documents into chunks, embed each chunk, store vectors + text + metadata in a vector store.</td><td>Once per document, or whenever documents change.</td></tr>
+    <tr><td><strong>Retrieval</strong></td><td>Embed the incoming user query, search the vector store for the most similar chunks.</td><td>Every single user query.</td></tr>
+    <tr><td><strong>Generation</strong></td><td>Insert the retrieved chunks into the prompt alongside the query, ask the LLM to answer <em>using only that context</em>.</td><td>Every single user query.</td></tr>
+  </tbody>
+</table>
+
+<h2>3. Chunking Strategies</h2>
+<p>
+You can't embed an entire 50-page manual as one vector &mdash; embedding models have their own input limits, and a
+single vector for a huge document would be too vague to match specific queries well. So documents are split into
+<strong>chunks</strong> first.
+</p>
+<table>
+  <thead><tr><th>Strategy</th><th>How it works</th><th>Tradeoff</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Fixed-size</strong></td>
+      <td>Split every <code class="inline">N</code> characters or tokens, regardless of content structure.</td>
+      <td>Simple and predictable, but can cut a sentence or idea in half.</td>
+    </tr>
+    <tr>
+      <td><strong>Fixed-size with overlap</strong></td>
+      <td>Same as above, but consecutive chunks share a small overlapping window (e.g. last 50 tokens of chunk
+      <em>N</em> = first 50 tokens of chunk <em>N+1</em>).</td>
+      <td>Reduces the "cut mid-idea" problem at the cost of some duplicated content across chunks.</td>
+    </tr>
+    <tr>
+      <td><strong>Structure-aware / recursive</strong></td>
+      <td>Split on natural boundaries first (sections, paragraphs, then sentences) and only fall back to a hard
+      character limit if a section is still too big.</td>
+      <td>Produces more semantically coherent chunks; more implementation effort.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="code-block">
+  <div class="code-head"><span>chunking.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -&gt; list[str]:
+    &quot;&quot;&quot;Fixed-size chunking with overlap, measured in characters.&quot;&quot;&quot;
+    chunks = []
+    start = 0
+    while start &lt; len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start = end - overlap  # step back by `overlap` so chunks share context
+    return chunks
+
+sample = open(&quot;data/course_notes.txt&quot;).read()
+chunks = chunk_text(sample, chunk_size=800, overlap=100)
+print(f&quot;{len(sample)} chars -&gt; {len(chunks)} chunks&quot;)</code></pre>
+</div>
+<div class="card note">
+  <h3>Engineering rule of thumb</h3>
+  <p>
+  Start with fixed-size + overlap (simple, works reasonably well almost everywhere), and measure retrieval
+  quality on real questions before reaching for a fancier structure-aware chunker. Typical starting points:
+  chunks of 500&ndash;1000 characters (or 200&ndash;400 tokens) with 10&ndash;20% overlap.
+  </p>
+</div>
+
+<h2>4. Vector Stores: ChromaDB and FAISS</h2>
+<p>
+A <strong>vector store</strong> holds your chunk embeddings and lets you search them efficiently by similarity,
+instead of the naive "loop over a Python list" approach from last week &mdash; essential once you have thousands
+of chunks instead of six.
+</p>
+<table>
+  <thead><tr><th></th><th>ChromaDB</th><th>FAISS</th></tr></thead>
+  <tbody>
+    <tr><td><strong>What it is</strong></td><td>A full embedded vector database: stores text, embeddings, and metadata together, with a simple Python API.</td><td>A library for fast similarity search over raw vectors (Facebook AI Similarity Search) &mdash; you manage the text/metadata yourself.</td></tr>
+    <tr><td><strong>Persistence</strong></td><td>Built-in (<code class="inline">PersistentClient</code>) &mdash; survives restarts with zero extra code.</td><td>You serialize the index yourself (<code class="inline">faiss.write_index</code>).</td></tr>
+    <tr><td><strong>Metadata filtering</strong></td><td>Built-in (filter by any field alongside similarity search).</td><td>Not built-in; you filter before/after the vector search yourself.</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Most application-level RAG: quick to set up, batteries included. What we'll use today.</td><td>Very large-scale or latency-critical search where you want fine control over the index type.</td></tr>
+  </tbody>
+</table>
+<div class="code-block">
+  <div class="code-head"><span>chromadb_indexing.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">import chromadb
+
+chroma_client = chromadb.PersistentClient(path=&quot;./chroma_db&quot;)
+collection = chroma_client.get_or_create_collection(name=&quot;course_notes&quot;)
+
+collection.add(
+    documents=chunks,
+    embeddings=[embed(c) for c in chunks],
+    ids=[f&quot;chunk-{i}&quot; for i in range(len(chunks))],
+)
+
+results = collection.query(
+    query_embeddings=[embed(&quot;What is context engineering?&quot;)],
+    n_results=3,
+)
+for doc, dist in zip(results[&quot;documents&quot;][0], results[&quot;distances&quot;][0]):
+    print(f&quot;{dist:.3f}  {doc[:80]}...&quot;)</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-head"><span>faiss_indexing.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">import faiss
+import numpy as np
+
+vectors = np.array([embed(c) for c in chunks], dtype=&quot;float32&quot;)
+index = faiss.IndexFlatL2(vectors.shape[1])
+index.add(vectors)
+
+query_vector = np.array([embed(&quot;What is context engineering?&quot;)], dtype=&quot;float32&quot;)
+distances, indices = index.search(query_vector, k=3)
+for dist, idx in zip(distances[0], indices[0]):
+    print(f&quot;{dist:.3f}  {chunks[idx][:80]}...&quot;)</code></pre>
+</div>
+
+<h2>5. Building a Functional RAG System</h2>
+<p>The generation step ties everything together: retrieve relevant chunks, then instruct the model to answer
+<strong>using only the retrieved context</strong> &mdash; the single most important prompting rule in RAG, and the
+one most responsible for reducing hallucination.</p>
+<div class="code-block">
+  <div class="code-head"><span>rag_answer.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">def answer_with_rag(question: str, n_results: int = 3) -&gt; str:
+    results = collection.query(query_embeddings=[embed(question)], n_results=n_results)
+    context = &quot;\n\n---\n\n&quot;.join(results[&quot;documents&quot;][0])
+
+    prompt = f&#x27;&#x27;&#x27;Answer the question using ONLY the context below. If the answer isn&#x27;t
+in the context, say you don&#x27;t have that information — do not make anything up.
+
+Context:
+{context}
+
+Question: {question}
+Answer:&#x27;&#x27;&#x27;
+
+    response = client.models.generate_content(
+        model=MODEL, contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.1),
+    )
+    return response.text
+
+print(answer_with_rag(&quot;What is context engineering?&quot;))</code></pre>
+</div>
+<div class="card warn">
+  <h3>Common failure mode</h3>
+  <p>
+  If your assistant confidently answers questions your documents never mention, check two things first: (1) is
+  the "answer ONLY from context" instruction actually in the prompt, and (2) is retrieval actually returning
+  relevant chunks (print them and read them yourself before blaming the LLM). Most "RAG hallucination" bugs
+  reported by students turn out to be retrieval bugs, not generation bugs.
+  </p>
+</div>
+
+<div class="card note">
+  <h3>This is your Corte 1 project, minus the polish</h3>
+  <p>
+  The RAG system you build in today's notebook is, functionally, a working draft of your Week 5 deliverable: a
+  conversational assistant combining context engineering (Weeks 2&ndash;3) and RAG (this week) over documents of
+  your choice, using the Gemini API and ChromaDB. Between now and the exam, swap the sample text for your own
+  <code class="inline">data/</code> folder, wire in the system prompt you drafted in Week 2, and add whatever
+  conversation-history handling you built in Week 3. See the activities page for the full delivery checklist and
+  grading rubric.
+  </p>
+</div>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (4/4): scaffolding a RAG project with Antigravity CLI</h3>
+  <p>
+  For your final basic-level touch this Corte, use <code class="inline">agy</code> to scaffold the folder
+  structure for your Corte 1 project in one shot. From your empty (or nearly empty) repo, try:
+  </p>
+  <blockquote>"Scaffold a Python project for a RAG assistant: a `data/` folder for source documents, an
+  `ingest.py` that chunks and embeds files from `data/` into a local ChromaDB collection, a `chat.py` that
+  answers questions using that collection, a `requirements.txt` with google-genai, chromadb, and python-dotenv,
+  and a README explaining how to run both scripts."</blockquote>
+  <p>
+  Review every proposed file before accepting — treat it as a first draft from a fast junior collaborator, not
+  a finished product. You now know enough (chunking, embeddings, vector stores, RAG prompting) to actually judge
+  whether what it generates is correct, which is the point of learning the fundamentals before leaning on a
+  coding agent to move faster.
+  </p>
+</div>
+
+<h2>6. Today's Notebook</h2>
+<p>Open <code class="inline">week-04-rag.ipynb</code> and work through, in order:</p>
+<ol>
+  <li>Chunk a sample text file with the overlap chunker.</li>
+  <li>Embed and index the chunks in ChromaDB; run the same indexing with FAISS for comparison.</li>
+  <li>Implement <code class="inline">answer_with_rag</code> and ask it several questions, including one whose
+  answer is <em>not</em> in the documents (to confirm it correctly says so).</li>
+  <li>A light ADK preview: an agent with a single custom <code class="inline">retrieve_context</code> tool, plus
+  the LangChain equivalent.</li>
+  <li>Open exercises &mdash; including running the pipeline on your <strong>own</strong> Corte 1 project documents.</li>
+</ol>
+
+<h2>7. Key Takeaways &amp; Glossary</h2>
+<ul>
+  <li>RAG = <strong>retrieval</strong> (find relevant chunks) + <strong>augmentation</strong> (insert them into the prompt) + <strong>generation</strong> (answer grounded in them).</li>
+  <li><strong>Chunking</strong> strategy affects retrieval quality directly &mdash; start simple (fixed-size + overlap), tune from there.</li>
+  <li><strong>ChromaDB</strong> is the pragmatic default for application-level RAG; <strong>FAISS</strong> is a lower-level, higher-control alternative for scale.</li>
+  <li>The single highest-leverage prompt instruction in RAG: <em>answer only from the provided context</em>.</li>
+  <li>Most perceived "hallucination" bugs in student RAG systems are actually retrieval bugs &mdash; always inspect what was retrieved.</li>
+</ul>
+<dl class="glossary">
+  <dt>RAG (Retrieval-Augmented Generation)</dt><dd>Grounding an LLM's answer in retrieved external documents instead of relying only on its training data.</dd>
+  <dt>Chunk</dt><dd>A piece of a document, sized to fit a single embedding call and a useful unit of retrieval.</dd>
+  <dt>Vector store</dt><dd>A database specialized for storing and similarity-searching embeddings (e.g. ChromaDB, FAISS).</dd>
+  <dt>Ingestion / Indexing</dt><dd>The one-time (or on-update) pipeline that turns raw documents into searchable chunk embeddings.</dd>
+  <dt>Grounding</dt><dd>Constraining a model's answer to be based on retrieved evidence rather than its own unconstrained generation.</dd>
+</dl>
+
+<h2>8. Further Reading</h2>
+<ul class="further-reading">
+  <li>Lewis, P. et al. (2020). <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</em> <span class="src"><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">arXiv:2005.11401</a></span></li>
+  <li>Huyen, C. (2025). <em>AI Engineering.</em> <span class="src">O'Reilly Media &mdash; chapter on RAG and agentic patterns.</span></li>
+  <li>ChromaDB documentation. <span class="src"><a href="https://docs.trychroma.com" target="_blank" rel="noopener">docs.trychroma.com</a></span></li>
+  <li>Google Antigravity CLI docs. <span class="src"><a href="https://antigravity.google/docs/cli/overview" target="_blank" rel="noopener">antigravity.google/docs/cli</a></span></li>
+  <li>See the activities page for the full Corte 1 project rubric and submission checklist.</li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 4: RAG. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>
