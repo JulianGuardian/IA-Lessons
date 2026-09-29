@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 7: Google ADK &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 2 &middot; Agents, Multi-Agent Systems &amp; LangGraph</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-07-google-adk-content.html">Lesson content</a>
+  <a class="" href="week-07-google-adk-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-06-agent-fundamentals-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 6: Agent Fundamentals</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 7: Google ADK</span></span>
+<a class="step next" href="week-08-multi-agent-systems-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 8: Multi-Agent Systems</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    
+    <div class="box">
+  <h2>Runnable code</h2>
+  <ul><li><a href="../agents/week-07-google-adk/" target="_blank" rel="noopener">Open week 07 agent apps &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 2 &middot; Week 7 of 16</p>
+    <h1 class="lesson-title">Google ADK: Architecture, Tools, State &amp; Sessions</h1>
+    <p class="lesson-lede">What Runner, SessionService, and events actually do under adk web's chat UI — plus the four state scopes and building an agent from an empty folder, step by step.</p>
+    
+<div class="card objectives">
+  <h3>By the end of this lesson, you will be able to</h3>
+  <ul>
+    <li>Describe ADK's core building blocks: <code class="inline">Agent</code>, <code class="inline">Runner</code>,
+    <code class="inline">SessionService</code>, and the event stream that connects them.</li>
+    <li>Write custom function tools, including tools that read and write session state via <code class="inline">ToolContext</code>.</li>
+    <li>Explain ADK's four state scopes &mdash; session, <code class="inline">user:</code>, <code class="inline">app:</code>,
+    <code class="inline">temp:</code> &mdash; and pick the right one for a given piece of data.</li>
+    <li>Build, run, and inspect an ADK agent from an empty folder, end to end.</li>
+  </ul>
+</div>
+
+<h2>1. ADK architecture: the four pieces</h2>
+<p>Last week you ran an ADK agent without looking under the hood. Four objects do all the work:</p>
+<figure class="diagram"><svg viewBox="0 0 428 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ADK&#x27;s core objects"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Agent</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">model + instruction + tools</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Runner</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">drives the PRA loop</text><line x1="322.0" y1="84" x2="322.0" y2="130" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="20" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">SessionService</text><text x="106.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">stores session.state</text><line x1="192" y1="162.0" x2="236" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Events</text><text x="322.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">everything that happened, streamed back</text></svg><figcaption>ADK&#x27;s core objects</figcaption></figure>
+<ul>
+  <li><strong>Agent</strong> (<code class="inline">google.adk.agents.Agent</code>, an alias for <code class="inline">LlmAgent</code>)
+  &mdash; declares the model, the system instruction, and the tools available. This is the object you defined as
+  <code class="inline">root_agent</code> last week.</li>
+  <li><strong>Runner</strong> &mdash; executes one user turn: calls the model, executes any requested tools, feeds
+  results back, repeats (the PRA loop from Week 6), and streams out <strong>events</strong> as it goes.</li>
+  <li><strong>SessionService</strong> &mdash; owns <code class="inline">session.state</code>, the dictionary an agent's
+  tools read and write. <code class="inline">adk web</code> uses an in-memory one; production deployments (Week 14)
+  swap in a database-backed one without changing any agent code.</li>
+  <li><strong>Events</strong> &mdash; every model response, tool call, and tool result is an event. The
+  <code class="inline">adk web</code> trace panel you used last week is just a viewer over this event stream.</li>
+</ul>
+<p>Explicitly, without the CLI wrapper:</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">import asyncio
+from google.adk.agents import Agent
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+
+root_agent = Agent(model=&quot;gemini-flash-latest&quot;, name=&quot;demo_agent&quot;, instruction=&quot;Be concise.&quot;)
+
+async def main():
+    runner = InMemoryRunner(agent=root_agent, app_name=&quot;demo_app&quot;)
+    session = await runner.session_service.create_session(app_name=&quot;demo_app&quot;, user_id=&quot;student_1&quot;)
+    content = types.Content(role=&quot;user&quot;, parts=[types.Part(text=&quot;Hello!&quot;)])
+    async for event in runner.run_async(user_id=&quot;student_1&quot;, session_id=session.id, new_message=content):
+        if event.is_final_response():
+            print(event.content.parts[0].text)
+
+asyncio.run(main())</code></pre>
+</div>
+<p>This is exactly what <code class="inline">adk web</code> does for you, with a chat UI and trace viewer wrapped
+around it.</p>
+
+<h2>2. Custom tools, formally</h2>
+<p>
+You wrote plain-function tools in Week 6. ADK turns any typed Python function with a docstring into a tool
+automatically &mdash; the function's name, parameter types, and docstring become the schema the model sees. Two
+rules matter in practice:
+</p>
+<ul>
+  <li><strong>Type hints are not optional.</strong> ADK derives the JSON schema from them; an untyped parameter
+  cannot be turned into a reliable tool schema.</li>
+  <li><strong>Return a dict, not a string.</strong> Structured results are easier for the model to reference precisely,
+  and easier for your own code to test.</li>
+</ul>
+<p>
+To read or write state from inside a tool, add a <code class="inline">tool_context: ToolContext</code> parameter
+&mdash; ADK injects it automatically; you never pass it yourself when calling the tool from a prompt:
+</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google.adk.tools.tool_context import ToolContext
+
+def log_study_session(topic: str, hours: float, tool_context: ToolContext) -&gt; dict:
+    &quot;&quot;&quot;Record a completed study session for the current user.&quot;&quot;&quot;
+    log = tool_context.state.get(&quot;session_log&quot;, [])
+    log.append({&quot;topic&quot;: topic, &quot;hours&quot;: hours})
+    tool_context.state[&quot;session_log&quot;] = log
+    return {&quot;logged&quot;: True, &quot;total_sessions&quot;: len(log)}</code></pre>
+</div>
+
+<h2>3. State scopes: session, user, app, temp</h2>
+<p>
+<code class="inline">tool_context.state</code> is a single dictionary, but the <strong>key prefix</strong> tells ADK
+how far a value should travel:
+</p>
+<table>
+  <thead><tr><th>Prefix</th><th>Scope</th><th>Use for</th></tr></thead>
+  <tbody>
+    <tr><td><code class="inline">(none)</code></td><td>Current session only &mdash; gone on a new session</td><td>Conversation-specific facts (Week 3's sliding window/summary)</td></tr>
+    <tr><td><code class="inline">user:</code></td><td>Shared across every session for this <code class="inline">user_id</code></td><td>Preferences that should persist across conversations</td></tr>
+    <tr><td><code class="inline">app:</code></td><td>Shared across every session, every user, in this app</td><td>App-wide config or shared counters</td></tr>
+    <tr><td><code class="inline">temp:</code></td><td>Current invocation only &mdash; never persisted</td><td>Scratch values a tool needs only within one turn</td></tr>
+  </tbody>
+</table>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">def set_preferred_pace(pace: str, tool_context: ToolContext) -&gt; dict:
+    &quot;&quot;&quot;Remember the user&#x27;s preferred study pace (&#x27;relaxed&#x27;, &#x27;normal&#x27;, or &#x27;intense&#x27;) across sessions.&quot;&quot;&quot;
+    tool_context.state[&quot;user:preferred_pace&quot;] = pace   # survives into every future session for this user_id
+    return {&quot;preferred_pace&quot;: pace}</code></pre>
+</div>
+<p>Pick the narrowest scope that does the job &mdash; state that does not need to outlive the session should not use
+<code class="inline">user:</code>, since it will otherwise leak into unrelated future conversations.</p>
+
+<h2>4. Walkthrough: building an agent from an empty folder</h2>
+<p>Formalizing what <code class="inline">adk web</code> did automatically last week &mdash; the exact steps, every time:</p>
+<div class="code-block">
+  <div class="code-head"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">mkdir -p my_agent &amp;&amp; cd my_agent
+touch __init__.py agent.py .env
+echo &quot;from . import agent&quot; &gt; __init__.py
+echo &#x27;GOOGLE_API_KEY=your-key-here&#x27; &gt; .env
+# write root_agent = Agent(...) inside agent.py
+cd ..
+adk web .   # discovers every subfolder with __init__.py + agent.py, launches a chat UI for each</code></pre>
+</div>
+<p>The three files are non-negotiable: <code class="inline">__init__.py</code> makes the folder importable and
+signals ADK to look inside it; <code class="inline">agent.py</code> must define a module-level
+<code class="inline">root_agent</code>; <code class="inline">.env</code> supplies credentials. Everything else
+(extra modules, tests, a README) is up to you.</p>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (2/5): Google Antigravity CLI &mdash; scaffolding an agent folder</h3>
+  <p>You now know exactly what the three required files must contain. Have Antigravity generate the skeleton so you
+  spend your time on the agent's actual logic, not boilerplate:</p>
+  <div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">agy
+&gt; Create an ADK agent folder called study_planner_agent/ with __init__.py (importing agent),
+  agent.py (a root_agent using model=&quot;gemini-flash-latest&quot; with a placeholder instruction),
+  and a .env with a GOOGLE_API_KEY placeholder. Follow the standard adk web folder convention.</code></pre>
+</div>
+  <p>Always re-read the generated <code class="inline">agent.py</code> before running it &mdash; confirm the
+  instruction, tool list, and model name match what you actually asked for.</p>
+</div>
+
+<h2>Glossary</h2>
+<dl class="glossary">
+  <dt>Runner</dt><dd>The ADK object that executes one user turn: drives the model/tool loop and streams events.</dd>
+  <dt>SessionService</dt><dd>Owns <code class="inline">session.state</code>; swappable between in-memory and persistent backends without changing agent code.</dd>
+  <dt>Event</dt><dd>A single step in a run &mdash; a model response, a tool call, or a tool result &mdash; streamed by the Runner.</dd>
+  <dt>ToolContext</dt><dd>Object ADK injects into a tool function to expose <code class="inline">state</code> and other run-time context.</dd>
+  <dt>State scope prefix</dt><dd><code class="inline">user:</code>, <code class="inline">app:</code>, or <code class="inline">temp:</code> on a state key, controlling how far a value persists.</dd>
+</dl>
+
+<h2>Further reading</h2>
+<ul class="further-reading">
+  <li>Google ADK documentation &mdash; Sessions and State. <span class="src">developers.google.com/adk &middot; adk.dev/sessions/state</span></li>
+  <li>Google ADK documentation &mdash; Tools. <span class="src">developers.google.com/adk</span></li>
+  <li>Google ADK documentation &mdash; Agent context (ToolContext). <span class="src">adk.dev/context</span></li>
+  <li><em>Your first agent with ADK</em> codelab. <span class="src">codelabs.developers.google.com/your-first-agent-with-adk</span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 7: Google ADK. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate','uvicorn'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

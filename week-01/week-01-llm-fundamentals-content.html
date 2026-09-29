@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1: LLM Fundamentals &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 1 &middot; Fundamentals of LLMs, Context Engineering &amp; RAG</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-01-llm-fundamentals-content.html">Lesson content</a>
+  <a class="" href="week-01-llm-fundamentals-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <span class="step prev disabled"><span class="tag">&larr; Before</span><span class="label">Course kickoff (no prior lesson)</span></span>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 1: LLM Fundamentals</span></span>
+<a class="step next" href="week-02-context-engineering-i-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 2: Context Engineering I</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    <div class="box">
+  <h2>Notebook</h2>
+  <ul><li><a href="../notebooks/week-01-llm-fundamentals.ipynb" target="_blank" rel="noopener">Open week 01 Jupyter notebook &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 1 &middot; Week 1 of 16</p>
+    <h1 class="lesson-title">LLM Fundamentals &amp; Environment Setup</h1>
+    <p class="lesson-lede">What a large language model actually is, how sampling parameters shape its output, and how to make your first free-tier Gemini API call from Python.</p>
+    
+<div class="card objectives">
+  <h3>Learning objectives</h3>
+  <ul>
+    <li>Explain, in practical (non-mathematical) terms, what a large language model is and how it turns text into text.</li>
+    <li>Define <em>token</em>, <em>embedding</em>, and <em>attention</em>, and connect each to a concrete example.</li>
+    <li>Predict how changing <code class="inline">temperature</code>, <code class="inline">top-p</code>, <code class="inline">top-k</code>, and <code class="inline">max_tokens</code> changes a model's output.</li>
+    <li>Compare the free-tier options for accessing Gemini, Llama, and Mistral models.</li>
+    <li>Set up a working Python environment authenticated against the Gemini API using a free Google AI Studio key.</li>
+    <li>Make your first call to a model through three different tools: the raw SDK, a one-line Google ADK agent, and a LangChain chat model &mdash; and recognize that all three are talking to the same underlying API.</li>
+  </ul>
+</div>
+
+<h2>1. Welcome to AI Agentic Engineering</h2>
+<p>
+This course sits at the intersection of two things that used to be separate disciplines: <strong>software engineering</strong>
+and <strong>large language models (LLMs)</strong>. Until recently, "using AI" in an application meant calling a
+classifier or a recommendation model that did one narrow thing. Today, a single API call can reason over
+free-form instructions, call tools, retrieve information, and chain multiple steps together to complete an
+open-ended task. That capability is what we call an <strong>agent</strong>, and building reliable, evaluable,
+production-grade systems around it is what we call <strong>AI (agentic) engineering</strong>.
+</p>
+<p>Over the next 16 weeks, organized in three graded cuts (<em>cortes</em>), you will move from fundamentals to a full
+production-style system:</p>
+<table>
+  <thead><tr><th>Corte</th><th>Weeks</th><th>Focus</th><th>Deliverable</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Corte 1</strong> (this one)</td><td>1&ndash;5</td><td>LLM fundamentals, context engineering, RAG</td><td>A conversational assistant with RAG over your own documents</td></tr>
+    <tr><td>Corte 2</td><td>6&ndash;11</td><td>Agents, multi-agent systems, Google ADK, LangGraph</td><td>A multi-agent system solving a real problem</td></tr>
+    <tr><td>Corte 3</td><td>12&ndash;16</td><td>Evaluation, observability, deployment, security</td><td>A full agentic system: agents + RAG + evals + tracing + REST API</td></tr>
+  </tbody>
+</table>
+<p>
+Every week you get two blocks in class: <strong>2 hours of theory</strong> (this document) and <strong>4 hours of hands-on
+lab</strong> (the accompanying activities page and Jupyter notebook). Everything we build uses <strong>free-tier
+APIs</strong> &mdash; no credit card required to follow along. Today we lay the foundation: what an LLM actually is,
+and how to talk to one from Python.
+</p>
+
+<h2>2. What is a Large Language Model?</h2>
+<p>
+A <strong>large language model</strong> is a neural network trained to do one deceptively simple thing extremely
+well: <strong>predict the next token</strong> given everything that came before it. Everything an LLM appears to
+do &mdash; answer questions, write code, hold a conversation, call a tool &mdash; emerges from repeating that single
+prediction step, one token at a time, over and over (this is called <strong>autoregressive generation</strong>).
+</p>
+
+<h3>2.1 Tokens: the model's alphabet</h3>
+<p>
+LLMs don't read letters or whole words &mdash; they read <strong>tokens</strong>, sub-word chunks produced by a
+tokenizer (commonly a byte-pair encoding or SentencePiece algorithm). A token might be a whole common word
+(<code class="inline">"the"</code>), a fragment of a longer word (<code class="inline">"token"</code> + <code class="inline">"izer"</code>),
+punctuation, or even a partial byte for rare characters. As a rule of thumb for English text, <strong>1 token
+&asymp; 4 characters &asymp; 0.75 words</strong>. This matters immediately in engineering terms: every model has a
+maximum number of tokens it can read and generate in one call (its <strong>context window</strong>, which we
+dedicate all of Week 3 to), and every provider bills per token.
+</p>
+
+<h3>2.2 Embeddings: meaning as coordinates</h3>
+<p>
+Before a token can be processed mathematically, it is converted into an <strong>embedding</strong>: a vector
+(a long list of numbers, typically hundreds to thousands of dimensions) that represents the token's meaning as
+a point in space. Tokens used in similar contexts end up with similar vectors &mdash; the embeddings for
+<code class="inline">"king"</code> and <code class="inline">"queen"</code> are close together, and famously,
+<code class="inline">king - man + woman &asymp; queen</code> in a well-trained embedding space. We will use this
+same idea &mdash; measuring how "close" two pieces of text are in vector space &mdash; as the backbone of semantic
+search and RAG starting in Week 3.
+</p>
+
+<h3>2.3 Attention: deciding what to look at</h3>
+<p>
+The architecture that made modern LLMs possible is the <strong>Transformer</strong> (Vaswani et al., 2017,
+<em>"Attention Is All You Need"</em> &mdash; see Further Reading). Its key mechanism, <strong>self-attention</strong>,
+lets every token in a sequence look at every other token and decide, dynamically, how much each of them matters
+for understanding it. In the sentence <em>"The trophy didn't fit in the suitcase because it was too big"</em>,
+attention is what lets the model correctly connect <code class="inline">"it"</code> to <code class="inline">"trophy"</code>
+rather than <code class="inline">"suitcase"</code>, by weighting the trophy token heavily when building the
+representation for "it". Stacking many attention + feed-forward layers on top of each other, and training on
+massive amounts of text, is what gives an LLM its ability to model long-range structure in language.
+</p>
+
+<h3>2.4 Putting it together: one generation step</h3>
+<figure class="diagram"><svg viewBox="0 0 644 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1. One autoregressive generation step. The output token is appended to the input and the whole pipeline repeats until a stop condition is reached."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Input text</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">&quot;The capital of France is&quot;</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Tokenizer</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">text → token IDs</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Embeddings</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">+ positional info</text><line x1="538.0" y1="84" x2="538.0" y2="130" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="20" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Transformer layers</text><text x="106.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">self-attention + feed-forward, ×N</text><line x1="192" y1="162.0" x2="236" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Next-token logits</text><text x="322.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">one score per vocab entry</text><line x1="408" y1="162.0" x2="452" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Sampling</text><text x="538.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">temperature / top-p / top-k → pick 1 token</text></svg><figcaption>Figure 1. One autoregressive generation step. The output token is appended to the input and the whole pipeline repeats until a stop condition is reached.</figcaption></figure>
+<p>
+The model repeats this entire pipeline once per output token, each time re-reading the whole sequence so far
+(original prompt + everything generated). That repetition is why longer generations take longer and cost more,
+and why <em>how</em> you pick the next token from the probability distribution &mdash; the topic of the next
+section &mdash; has such a visible effect on the result.
+</p>
+
+<h2>3. Inference Parameters: Controlling How the Model Chooses Words</h2>
+<p>
+The last step of the pipeline above (<strong>sampling</strong>) doesn't just pick the single most likely next
+token every time &mdash; that would make output robotic and repetitive. Instead, the model produces a full
+probability distribution over its entire vocabulary, and a handful of parameters control how a token is drawn
+from that distribution.
+</p>
+<table>
+  <thead><tr><th>Parameter</th><th>What it does</th><th>Low value</th><th>High value</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code class="inline">temperature</code></td>
+      <td>Rescales the probability distribution before sampling. Divides the logits by this value.</td>
+      <td><code class="inline">0.0&ndash;0.3</code>: peaked, near-deterministic, repeatable &mdash; good for extraction, classification, code.</td>
+      <td><code class="inline">0.8&ndash;1.2</code>: flatter distribution, more variety and creativity, more risk of drifting off-topic.</td>
+    </tr>
+    <tr>
+      <td><code class="inline">top_p</code> (nucleus sampling)</td>
+      <td>Restricts sampling to the smallest set of tokens whose cumulative probability &ge; <code class="inline">p</code>.</td>
+      <td><code class="inline">0.1</code>: only the most probable tokens are ever considered.</td>
+      <td><code class="inline">1.0</code>: every token with non-zero probability is eligible.</td>
+    </tr>
+    <tr>
+      <td><code class="inline">top_k</code></td>
+      <td>Restricts sampling to the <code class="inline">k</code> single most probable tokens, regardless of their probability mass.</td>
+      <td><code class="inline">1</code>: equivalent to greedy decoding (always the top token).</td>
+      <td><code class="inline">40+</code>: allows more unusual word choices.</td>
+    </tr>
+    <tr>
+      <td><code class="inline">max_output_tokens</code></td>
+      <td>Hard cap on how many tokens the model is allowed to generate in this call. Generation stops early if a stop token is produced first.</td>
+      <td>Short answers, lower latency, lower cost.</td>
+      <td>Room for long-form output; does not force the model to use it.</td>
+    </tr>
+  </tbody>
+</table>
+<div class="card note">
+  <h3>Engineering rule of thumb</h3>
+  <p>
+  For tasks with a single correct answer (data extraction, classification, generating JSON, function-call
+  arguments), use <strong>low temperature (0&ndash;0.3)</strong> and let <code class="inline">top_p</code>/<code class="inline">top_k</code>
+  sit at their defaults. For open-ended writing or brainstorming, raise temperature first before touching
+  <code class="inline">top_p</code>/<code class="inline">top_k</code> &mdash; changing three knobs at once makes
+  behavior hard to reason about.
+  </p>
+</div>
+<p>You'll run a controlled experiment sweeping these parameters against the same prompt in today's notebook &mdash;
+seeing the distribution collapse and widen is far more convincing than reading about it.</p>
+
+<h2>4. Free-Tier Models You Can Use in This Course</h2>
+<p>
+This course runs entirely on free-access APIs. You are free to experiment with any of the following, but all
+graded labs and projects are guaranteed to work with <strong>Gemini</strong>, which is what the instructor will
+demo with and what the starter notebooks target by default.
+</p>
+<table>
+  <thead><tr><th>Family</th><th>How to access for free</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Gemini</strong> (Google)</td>
+      <td>Google AI Studio &rarr; free API key, generous free-tier request quota</td>
+      <td>Primary model for this course. Fast <code class="inline">gemini-flash-latest</code> tier is more than
+      enough for every exercise; native JSON-schema output, function calling, and long context windows.</td>
+    </tr>
+    <tr>
+      <td><strong>Llama</strong> (Meta, open-weight)</td>
+      <td>Free inference tiers on providers such as Groq or OpenRouter, or run locally with Ollama (no API key needed at all)</td>
+      <td>Good for understanding that "the model" and "the API" are separable &mdash; the same open weights are served
+      by many different free and paid providers.</td>
+    </tr>
+    <tr>
+      <td><strong>Mistral</strong> (Mistral AI, open-weight + hosted)</td>
+      <td>La Plateforme free developer tier, or self-hosted via Ollama</td>
+      <td>European alternative; strong small models; useful for comparing output style and instruction-following
+      against Gemini/Llama on the same prompt.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+Keeping your code provider-agnostic where possible (small wrapper functions, configurable model name) is good
+practice &mdash; you'll feel the benefit the moment you want to swap models to compare cost, latency, or quality.
+</p>
+
+<h2>5. Setting Up Your Environment</h2>
+<h3>5.1 Get a free Gemini API key</h3>
+<ol>
+  <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio &rarr; API Keys</a> and sign in with a Google account.</li>
+  <li>Click <strong>Create API key</strong>. Copy it somewhere safe &mdash; treat it like a password.</li>
+  <li>Never commit the key to Git. We'll load it from a local <code class="inline">.env</code> file that stays out of version control.</li>
+</ol>
+
+<h3>5.2 Create a Python environment</h3>
+<div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash"># from your course project folder
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+pip install --upgrade google-genai google-adk langchain-google-genai langgraph python-dotenv</code></pre>
+</div>
+<h3>5.3 Store your key</h3>
+<p>Create a file named <code class="inline">.env</code> next to your notebook:</p>
+<div class="code-block">
+  <div class="code-head"><span>.env</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">GOOGLE_API_KEY=&quot;paste-your-key-here&quot;</code></pre>
+</div>
+<h3>5.4 Make your first call &mdash; three ways</h3>
+<p>
+All three snippets below send the exact same prompt to the exact same Gemini model. The point isn't which tool
+is "better" &mdash; it's recognizing the same underlying LLM call underneath every framework you'll touch this
+semester. We'll go deep on ADK and LangGraph starting Week 6&ndash;7; for now we're just getting comfortable with
+the syntax.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>Option A — raw google-genai SDK</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">import os
+from dotenv import load_dotenv
+from google import genai
+
+load_dotenv()
+client = genai.Client(api_key=os.environ[&quot;GOOGLE_API_KEY&quot;])
+
+response = client.models.generate_content(
+    model=&quot;gemini-flash-latest&quot;,
+    contents=&quot;In one sentence, what is a large language model?&quot;,
+)
+print(response.text)</code></pre>
+</div><div class="code-block">
+  <div class="code-head"><span>Option B — Google ADK (one-line agent)</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google.adk.agents.llm_agent import Agent
+
+root_agent = Agent(
+    model=&quot;gemini-flash-latest&quot;,
+    name=&quot;intro_agent&quot;,
+    instruction=&quot;Answer in exactly one sentence.&quot;,
+)
+# In this notebook we call the agent programmatically with the ADK Runner;
+# see today&#x27;s notebook for the full runnable version.</code></pre>
+</div><div class="code-block">
+  <div class="code-head"><span>Option C — LangChain chat model</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from langchain_google_genai import ChatGoogleGenerativeAI
+
+llm = ChatGoogleGenerativeAI(model=&quot;gemini-flash-latest&quot;)
+response = llm.invoke(&quot;In one sentence, what is a large language model?&quot;)
+print(response.content)</code></pre>
+</div>
+<p>
+Notice the shape is always the same: <strong>configure a model &rarr; send a prompt &rarr; read back text.</strong>
+ADK and LangChain add agent/graph structure on top of this same primitive as your systems grow more complex &mdash;
+that structure is exactly what Corte 2 (Weeks 6&ndash;11) is about.
+</p>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (1/4): Google Antigravity CLI &mdash; installing your terminal coding agent</h3>
+  <p>
+  Throughout this course you'll periodically meet <strong>Google Antigravity CLI</strong> (binary name
+  <code class="inline">agy</code>), Google's agentic coding assistant for the terminal. It is not part of the
+  graded content, but it's a genuinely useful companion while you work through labs: it can read your project,
+  propose multi-file edits, run commands, and explain errors, all from the command line. We'll add one small
+  skill each week.
+  </p>
+  <p><strong>This week: install it and have your first conversation.</strong></p>
+  <div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash"># macOS / Linux
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+# Windows (PowerShell)
+irm https://antigravity.google/cli/install.ps1 | iex
+
+# start it from any project folder
+agy</code></pre>
+</div>
+  <p>
+  The first run opens a browser window to sign in with your Google account (no separate API key needed). Once
+  inside, try a single low-stakes request, for example:
+  </p>
+  <blockquote>"Explain what a virtual environment is and check whether one is active in this folder."</blockquote>
+  <p>
+  Two commands worth knowing immediately: type <code class="inline">?</code> to list all slash commands, and
+  prefix a line with <code class="inline">!</code> to run a raw shell command without leaving the session. We'll
+  use <code class="inline">agy</code> to scaffold boilerplate faster starting next week.
+  </p>
+</div>
+
+<h2>6. Today's Notebook</h2>
+<p>
+Open <code class="inline">week-01-llm-fundamentals.ipynb</code> (linked in the sidebar) and work through it during
+the lab block. It covers, in order:
+</p>
+<ol>
+  <li>Environment check and first raw Gemini API call.</li>
+  <li>A <strong>temperature/top-p/top-k sweep</strong>: the same prompt run at several settings so you can see the
+  output distribution change.</li>
+  <li>Token counting with the SDK's <code class="inline">count_tokens</code> helper, so "1 token &asymp; 4 characters"
+  stops being an abstraction.</li>
+  <li>The same call reproduced with a minimal <strong>Google ADK</strong> agent and a minimal
+  <strong>LangChain</strong> chat model, side by side with the raw SDK version.</li>
+  <li>Open exercises for you to modify and observe.</li>
+</ol>
+
+<h2>7. Key Takeaways &amp; Glossary</h2>
+<ul>
+  <li>An LLM is fundamentally a <strong>next-token predictor</strong>; everything else is that idea applied repeatedly.</li>
+  <li><strong>Tokens</strong>, not characters or words, are the unit LLMs read, write, and are billed in.</li>
+  <li><strong>Embeddings</strong> place tokens (and, as we'll see in Week 3&ndash;4, whole passages) as points in a
+  meaning-space where distance signals semantic similarity.</li>
+  <li><strong>Self-attention</strong> lets the model dynamically weigh which earlier tokens matter for the one it's
+  currently processing.</li>
+  <li><code class="inline">temperature</code>, <code class="inline">top_p</code>, and <code class="inline">top_k</code>
+  shape the sampling step; they trade determinism for variety.</li>
+  <li>Whichever tool you call it through (raw SDK, ADK, LangChain), you are always ultimately making the same
+  underlying API call.</li>
+</ul>
+<dl class="glossary">
+  <dt>LLM (Large Language Model)</dt><dd>A neural network trained to predict the next token in a sequence of text.</dd>
+  <dt>Token</dt><dd>A sub-word unit of text; the basic unit an LLM reads/writes and is billed on.</dd>
+  <dt>Embedding</dt><dd>A numeric vector representing the meaning of a token or piece of text.</dd>
+  <dt>Attention</dt><dd>The Transformer mechanism that weighs how much each token should influence another token's representation.</dd>
+  <dt>Context window</dt><dd>The maximum number of tokens (input + output) a model can handle in a single call. Deep dive in Week 3.</dd>
+  <dt>Temperature</dt><dd>A sampling parameter that scales the probability distribution over the next token; higher = more random.</dd>
+</dl>
+
+<h2>8. Further Reading</h2>
+<ul class="further-reading">
+  <li>Vaswani, A. et al. (2017). <em>Attention Is All You Need.</em> <span class="src"><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a> &mdash; the original Transformer paper.</span></li>
+  <li>Huyen, C. (2025). <em>AI Engineering: Building Applications with Foundation Models.</em> <span class="src">O'Reilly Media &mdash; course textbook, Ch. 1&ndash;2 on foundation models and inference.</span></li>
+  <li>Google AI Studio / Gemini API docs. <span class="src"><a href="https://ai.google.dev" target="_blank" rel="noopener">ai.google.dev</a></span></li>
+  <li>Google Antigravity CLI docs. <span class="src"><a href="https://antigravity.google/docs/cli/overview" target="_blank" rel="noopener">antigravity.google/docs/cli</a></span></li>
+  <li>Google ADK documentation. <span class="src"><a href="https://adk.dev" target="_blank" rel="noopener">adk.dev</a></span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 1: LLM Fundamentals. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

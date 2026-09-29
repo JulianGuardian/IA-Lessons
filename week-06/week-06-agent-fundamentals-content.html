@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 6: Agent Fundamentals &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 2 &middot; Agents, Multi-Agent Systems &amp; LangGraph</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-06-agent-fundamentals-content.html">Lesson content</a>
+  <a class="" href="week-06-agent-fundamentals-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-04-rag-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 4: RAG</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 6: Agent Fundamentals</span></span>
+<a class="step next" href="week-07-google-adk-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 7: Google ADK</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    
+    <div class="box">
+  <h2>Runnable code</h2>
+  <ul><li><a href="../agents/week-06-agent-fundamentals/" target="_blank" rel="noopener">Open week 06 agent apps &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 2 &middot; Week 6 of 16</p>
+    <h1 class="lesson-title">Agent Fundamentals: The Perception-Reasoning-Action Loop</h1>
+    <p class="lesson-lede">What actually makes an LLM an “agent”: tool use, function calling, and the ReAct and Plan-and-Execute patterns — built by hand once, then run through ADK and LangGraph.</p>
+    <div class="card note">
+  <h3>Where we are</h3>
+  <p>Week 5 was the <strong>Corte 1 exam</strong> &mdash; individual practical-project delivery (no new lecture content). This lesson opens <strong>Corte 2</strong>.</p>
+</div>
+<div class="card objectives">
+  <h3>By the end of this lesson, you will be able to</h3>
+  <ul>
+    <li>Explain what makes an LLM call an "AI agent" instead of a chatbot: the Perception-Reasoning-Action loop.</li>
+    <li>Describe how tool use / function calling works mechanically, round-trip, with any LLM API.</li>
+    <li>Contrast the ReAct pattern (interleaved reasoning + acting) with Plan-and-Execute (plan upfront, then run).</li>
+    <li>Trace a hand-rolled ReAct loop line by line, without any agent framework.</li>
+    <li>Run the same tool-using agent two ways: as a Google ADK agent and as a LangGraph <code class="inline">create_react_agent</code>.</li>
+  </ul>
+</div>
+
+<div class="card note">
+  <h3>Welcome to Corte 2</h3>
+  <p>
+  Corte 1 was about feeding an LLM the right words: prompts, context, retrieved documents. Corte 2 is about giving
+  the LLM the ability to <strong>act</strong> &mdash; call functions, use tools, and loop until a goal is met. This is
+  the shift from "language model" to "agent."
+  </p>
+  <p>
+  <strong>Corte 2 project (due Week 11):</strong> a multi-agent system that solves a real problem, built with Google
+  ADK or LangGraph and integrating RAG &mdash; worth 25% (project) + 5% (in-class activities) of your grade. You will
+  build the pieces week by week starting today.
+  </p>
+</div>
+
+<h2>1. What is an AI agent?</h2>
+<p>
+A plain LLM call is a function: text in, text out. It cannot check today's weather, query a database, or send an
+email &mdash; it can only guess what those things might say, and it will hallucinate confidently if you let it. An
+<strong>agent</strong> wraps an LLM in a loop that lets it:
+</p>
+<ol>
+  <li><strong>Perceive</strong> &mdash; read the user's request and the current state of the world (tool results so far).</li>
+  <li><strong>Reason</strong> &mdash; decide, in natural language, what to do next.</li>
+  <li><strong>Act</strong> &mdash; call a tool (a function, an API, a database query) that actually changes or reads the world.</li>
+</ol>
+<p>The loop repeats &mdash; the result of the action becomes new perception &mdash; until the model decides it has enough
+information to give a final answer.</p>
+<figure class="diagram"><svg viewBox="0 0 644 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Perception-Reasoning-Action (PRA) loop"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Perceive</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">user input + tool results</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Reason</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">LLM decides next step</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Act</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">call a tool / API</text></svg><figcaption>The Perception-Reasoning-Action (PRA) loop</figcaption></figure>
+<p>
+Everything you will build for the rest of the course &mdash; a single ADK agent, a LangGraph state machine, a
+multi-agent swarm &mdash; is this loop, dressed up with more structure. Today you build it by hand once, so nothing
+a framework does later feels like magic.
+</p>
+
+<h2>2. Tool use and function calling</h2>
+<p>
+"Function calling" is a training-time capability: modern LLMs (Gemini, GPT, Llama 3+, Mistral) have been fine-tuned
+to recognize when a user's request needs external information or action, and to emit a structured, machine-readable
+request to call one of the functions <em>you</em> described to them &mdash; instead of answering in prose.
+</p>
+<p>The round-trip has four steps, and <strong>you</strong> (the application code) are responsible for steps 2 and 4 &mdash;
+the model never executes anything itself:</p>
+<figure class="diagram"><svg viewBox="0 0 428 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The function-calling round trip"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">1. You describe tools</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">JSON schema per function</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">2. Model requests a call</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">function name + args</text><line x1="322.0" y1="84" x2="322.0" y2="130" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="20" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">3. Your code executes it</text><text x="106.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">the actual Python function</text><line x1="192" y1="162.0" x2="236" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">4. You return the result</text><text x="322.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">model continues reasoning</text></svg><figcaption>The function-calling round trip</figcaption></figure>
+<p>Every tool you expose to an LLM needs a name, a natural-language description (the model's <em>only</em> way to know
+when to use it), and a schema for its parameters. In the raw Gemini API this looks like:</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google import genai
+from google.genai import types
+
+def get_course_topic(week: int) -&gt; dict:
+    &quot;&quot;&quot;Look up which topic is covered in a given week of this course.&quot;&quot;&quot;
+    topics = {6: &quot;Agent fundamentals&quot;, 7: &quot;Google ADK&quot;, 8: &quot;Multi-agent systems&quot;}
+    return {&quot;week&quot;: week, &quot;topic&quot;: topics.get(week, &quot;unknown&quot;)}
+
+client = genai.Client(api_key=&quot;...&quot;)
+config = types.GenerateContentConfig(tools=[get_course_topic])  # google-genai can wrap a plain Python function
+
+response = client.models.generate_content(
+    model=&quot;gemini-flash-latest&quot;,
+    contents=&quot;What are we covering in week 7?&quot;,
+    config=config,
+)
+print(response.text)  # SDK auto-executes the tool and feeds the result back for you</code></pre>
+</div>
+<p>
+The <code class="inline">google-genai</code> SDK can auto-execute plain Python functions passed as tools (as shown
+above) &mdash; convenient, but it hides the round-trip. Section 4 below builds the loop <strong>manually</strong> so
+you see every step.
+</p>
+
+<h2>3. Agent patterns: ReAct vs. Plan-and-Execute</h2>
+<h3>ReAct (Reasoning + Acting)</h3>
+<p>
+Introduced by <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">Yao et al., 2022</a>, ReAct
+interleaves a visible <strong>Thought</strong> (why do this next), an <strong>Action</strong> (a tool call), and an
+<strong>Observation</strong> (the tool's result) on every iteration. The model re-plans after every single tool
+result &mdash; flexible, and easy to debug because you can literally read its reasoning, but it can take many small
+steps for a task that has an obvious upfront plan.
+</p>
+<figure class="diagram"><svg viewBox="0 0 644 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One ReAct iteration &amp;mdash; repeats until the model has a final answer"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Thought</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">what should I do?</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Action</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">call a tool</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Observation</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">read the result</text></svg><figcaption>One ReAct iteration &amp;mdash; repeats until the model has a final answer</figcaption></figure>
+<h3>Plan-and-Execute</h3>
+<p>
+Here the model first writes a full multi-step plan, and only <em>then</em> executes each step (optionally
+re-planning if a step fails). Fewer expensive "thinking" calls to the LLM for tasks that are naturally sequential,
+but less adaptive mid-task &mdash; if step 2 reveals the plan is wrong, you need explicit re-planning logic.
+</p>
+<table>
+  <thead><tr><th>Pattern</th><th>Best for</th><th>Cost pattern</th></tr></thead>
+  <tbody>
+    <tr><td>ReAct</td><td>Open-ended, exploratory tasks where the next step depends on the last result</td><td>1 LLM call per step</td></tr>
+    <tr><td>Plan-and-Execute</td><td>Tasks with a predictable structure (e.g. "book flight, then hotel, then rental car")</td><td>1 planning call + cheaper execution calls</td></tr>
+  </tbody>
+</table>
+<p>
+Google ADK's default <code class="inline">LlmAgent</code> tool loop (next week) and LangGraph's
+<code class="inline">create_react_agent</code> (this week's lab) both implement ReAct. You will meet an explicit
+Plan-and-Execute-style workflow agent (<code class="inline">SequentialAgent</code>) in Week 8.
+</p>
+
+<h2>4. Walkthrough: a ReAct loop with no framework</h2>
+<p>
+Before any framework does this for you, build it yourself once. This loop calls Gemini, checks whether it asked for
+a function call, executes it locally, feeds the result back, and repeats &mdash; the exact PRA loop from Section 1,
+in about 25 lines:
+</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google import genai
+from google.genai import types
+
+def get_course_topic(week: int) -&gt; dict:
+    &quot;&quot;&quot;Look up which topic is covered in a given week of this course.&quot;&quot;&quot;
+    topics = {6: &quot;Agent fundamentals&quot;, 7: &quot;Google ADK&quot;, 8: &quot;Multi-agent systems&quot;, 9: &quot;LangGraph I&quot;}
+    return {&quot;week&quot;: week, &quot;topic&quot;: topics.get(week, &quot;unknown&quot;)}
+
+TOOLS = {&quot;get_course_topic&quot;: get_course_topic}
+tool_declarations = [types.Tool(function_declarations=[
+    types.FunctionDeclaration(
+        name=&quot;get_course_topic&quot;,
+        description=&quot;Look up which topic is covered in a given week of this course.&quot;,
+        parameters={&quot;type&quot;: &quot;OBJECT&quot;, &quot;properties&quot;: {&quot;week&quot;: {&quot;type&quot;: &quot;INTEGER&quot;}}, &quot;required&quot;: [&quot;week&quot;]},
+    )
+])]
+
+client = genai.Client(api_key=&quot;...&quot;)
+contents = [types.Content(role=&quot;user&quot;, parts=[types.Part.from_text(text=&quot;What topic is week 8 about?&quot;)])]
+
+for step in range(5):  # PRA loop, capped so a confused model cannot loop forever
+    response = client.models.generate_content(
+        model=&quot;gemini-flash-latest&quot;, contents=contents,
+        config=types.GenerateContentConfig(tools=tool_declarations),
+    )
+    part = response.candidates[0].content.parts[0]
+    if part.function_call:                                    # ACT: model asked for a tool
+        call = part.function_call
+        print(f&quot;[Thought -&gt; Action] calling {call.name}({dict(call.args)})&quot;)
+        result = TOOLS[call.name](**call.args)                # your code executes it
+        print(f&quot;[Observation] {result}&quot;)
+        contents.append(response.candidates[0].content)
+        contents.append(types.Content(role=&quot;user&quot;, parts=[
+            types.Part.from_function_response(name=call.name, response=result)
+        ]))
+        continue                                                # PERCEIVE: loop with the new observation
+    print(&quot;[Final answer]&quot;, part.text)                          # model is done reasoning
+    break</code></pre>
+</div>
+<p>Run this in a Python file or a REPL &mdash; watch it print a Thought/Action pair, an Observation, then a final
+answer. This is literally what every agent framework you use from now on is doing under the hood.</p>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (1/5): Google Antigravity CLI &mdash; scaffolding a tool function</h3>
+  <p>
+  You now understand exactly what a "tool" needs: a typed function signature and a clear docstring. Ask Antigravity
+  to scaffold one instead of typing boilerplate by hand:
+  </p>
+  <div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">agy
+&gt; Add a Python function `estimate_study_hours(topic: str, difficulty: str) -&gt; dict` to tools.py.
+  It should return {&quot;topic&quot;:..., &quot;difficulty&quot;:..., &quot;hours&quot;: &lt;int&gt;} using a simple lookup table for
+  difficulty in {&quot;easy&quot;,&quot;medium&quot;,&quot;hard&quot;}. Include a docstring suitable as an LLM tool description.</code></pre>
+</div>
+  <p>Review the generated docstring carefully &mdash; it is the <em>only</em> thing the model reads to decide when
+  to call your tool, so vague wording (e.g. "does stuff with topics") will cause the agent to miss or misuse it.</p>
+</div>
+
+<h2>Glossary</h2>
+<dl class="glossary">
+  <dt>Agent</dt><dd>An LLM wrapped in a loop that lets it call tools and re-reason on their results until it reaches a goal.</dd>
+  <dt>Perception-Reasoning-Action (PRA) loop</dt><dd>The read-decide-act cycle underlying every agent framework.</dd>
+  <dt>Tool use / function calling</dt><dd>An LLM capability to emit a structured request to call an application-defined function instead of answering in prose.</dd>
+  <dt>ReAct</dt><dd>Agent pattern that interleaves a visible Thought, an Action (tool call), and an Observation on every step.</dd>
+  <dt>Plan-and-Execute</dt><dd>Agent pattern that plans all steps upfront, then executes them, optionally re-planning on failure.</dd>
+  <dt>Trajectory</dt><dd>The full sequence of thoughts, tool calls, and observations an agent produced for one task &mdash; what ADK's evaluation framework compares in Week 12.</dd>
+</dl>
+
+<h2>Further reading</h2>
+<ul class="further-reading">
+  <li>Yao et al., 2022. <em>ReAct: Synergizing Reasoning and Acting in Language Models.</em> <span class="src">arxiv.org/abs/2210.03629</span></li>
+  <li>Google AI for Developers &mdash; Function calling with Gemini. <span class="src">ai.google.dev/gemini-api/docs/function-calling</span></li>
+  <li>Google ADK documentation &mdash; Tools. <span class="src">developers.google.com/adk</span></li>
+  <li>LangGraph documentation &mdash; Prebuilt ReAct agent. <span class="src">langchain-ai.github.io/langgraph</span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 6: Agent Fundamentals. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate','uvicorn'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

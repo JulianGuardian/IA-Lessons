@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 3: Context Engineering II &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 1 &middot; Fundamentals of LLMs, Context Engineering &amp; RAG</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-03-context-engineering-ii-content.html">Lesson content</a>
+  <a class="" href="week-03-context-engineering-ii-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-02-context-engineering-i-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 2: Context Engineering I</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 3: Context Engineering II</span></span>
+<a class="step next" href="week-04-rag-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 4: RAG</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    <div class="box">
+  <h2>Notebook</h2>
+  <ul><li><a href="../notebooks/week-03-context-engineering-ii.ipynb" target="_blank" rel="noopener">Open week 03 Jupyter notebook &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 1 &middot; Week 3 of 16</p>
+    <h1 class="lesson-title">Context Engineering II</h1>
+    <p class="lesson-lede">Managing the context window at scale — sliding windows, summarization, compression — plus an introduction to embeddings and semantic search.</p>
+    
+<div class="card objectives">
+  <h3>Learning objectives</h3>
+  <ul>
+    <li>Explain why context windows are a hard engineering constraint, not just a soft "the model forgot" annoyance.</li>
+    <li>Implement a sliding-window truncation strategy for a growing conversation history.</li>
+    <li>Implement rolling summarization to compress old turns while preserving important information.</li>
+    <li>Describe compression techniques beyond summarization (structured memory extraction).</li>
+    <li>Generate text embeddings and compute similarity between them.</li>
+    <li>Build a minimal semantic search function over a small set of texts using cosine similarity.</li>
+  </ul>
+</div>
+
+<h2>1. The Context Window Problem</h2>
+<p>
+Every model has a maximum number of tokens it can process in a single call &mdash; its <strong>context window</strong>
+(back from Week 1: input tokens + output tokens together must fit inside this limit). Modern models offer
+increasingly large windows, but that doesn't make the problem disappear:
+</p>
+<ul>
+  <li><strong>Cost</strong>: you're billed per input token on every single call, including the entire conversation history you resend each turn.</li>
+  <li><strong>Latency</strong>: bigger inputs take longer to process.</li>
+  <li><strong>Quality</strong>: research on long-context models consistently shows a <strong>"lost in the middle"</strong>
+  effect &mdash; information placed in the middle of a very long context is recalled less reliably than information
+  near the start or end.</li>
+</ul>
+<p>
+So even when a model <em>can</em> technically hold your whole conversation, you often shouldn't just keep
+appending to it forever. This week covers three engineering strategies for managing what actually goes into the
+context window on each call, plus the concept &mdash; embeddings &mdash; that will let us manage context
+<em>semantically</em> rather than just chronologically, starting with RAG next week.
+</p>
+
+<h2>2. Three Strategies for Managing Context</h2>
+<figure class="diagram"><svg viewBox="0 0 644 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1. Three ways to decide what goes into the next call&#x27;s context."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Full history</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">resend everything, every turn</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Sliding window</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">keep only the last N turns</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Summarization</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">compress old turns into a summary</text></svg><figcaption>Figure 1. Three ways to decide what goes into the next call&#x27;s context.</figcaption></figure>
+<h3>2.1 Sliding window</h3>
+<p>
+The simplest strategy: keep only the last <em>N</em> turns (or the last <em>T</em> tokens) and drop everything
+older. Cheap to implement, predictable cost, but older information is <strong>permanently lost</strong> &mdash; fine
+for a short support chat, risky for anything where early context matters later (e.g. a user stating a constraint
+in turn 1 that should still apply in turn 20).
+</p>
+<div class="code-block">
+  <div class="code-head"><span>sliding_window.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">def sliding_window(history: list[dict], max_turns: int = 6) -&gt; list[dict]:
+    &quot;&quot;&quot;Keep only the most recent `max_turns` messages.&quot;&quot;&quot;
+    return history[-max_turns:]
+
+history = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;message {i}&quot;} for i in range(10)]
+print(sliding_window(history, max_turns=4))</code></pre>
+</div>
+<h3>2.2 Summarization</h3>
+<p>
+Instead of dropping old turns, periodically ask the model to <strong>summarize</strong> them into a compact block,
+and keep that summary plus only the most recent turns in full. This preserves information at much lower token
+cost than keeping full history, at the price of one extra LLM call and the possibility that the summary loses
+some nuance.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>rolling_summarization.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">def summarize_history(client, model, history: list[dict]) -&gt; str:
+    transcript = &quot;\n&quot;.join(f&quot;{m[&#x27;role&#x27;]}: {m[&#x27;content&#x27;]}&quot; for m in history)
+    prompt = (
+        &quot;Summarize the key facts, decisions, and open questions from this conversation &quot;
+        &quot;in 3-5 bullet points. Be specific, don&#x27;t generalize away details a follow-up &quot;
+        &quot;question might need.\n\n&quot; + transcript
+    )
+    response = client.models.generate_content(model=model, contents=prompt)
+    return response.text
+
+def compact_context(client, model, history, keep_recent=4):
+    if len(history) &lt;= keep_recent:
+        return history
+    older, recent = history[:-keep_recent], history[-keep_recent:]
+    summary = summarize_history(client, model, older)
+    return [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: f&quot;Conversation summary so far:\n{summary}&quot;}] + recent</code></pre>
+</div>
+<h3>2.3 Compression: structured memory</h3>
+<p>
+A more aggressive form of compression extracts only the facts you'll actually need again into a small structured
+record (a dict, or a schema-forced JSON object from Week 2) &mdash; e.g. <code class="inline">{"user_name": ..., "preferences": [...], "open_issue": ...}</code>
+&mdash; instead of a paragraph summary. This trades flexibility for even lower token cost and easy programmatic
+access, and pairs naturally with the persistent session state you'll manage explicitly once we reach Google ADK
+sessions in Week 7.
+</p>
+
+<h2>3. Embeddings, Revisited: From Tokens to Whole Passages</h2>
+<p>
+In Week 1 we introduced embeddings as vectors representing token meaning. The same idea scales up: an
+<strong>embedding model</strong> can take an entire sentence, paragraph, or document and return a single vector
+summarizing its meaning. Texts with similar meaning end up with vectors that point in similar directions &mdash;
+which we measure with <strong>cosine similarity</strong> (1.0 = identical direction/meaning, 0 = unrelated,
+-1.0 = opposite).
+</p>
+<div class="code-block">
+  <div class="code-head"><span>generating an embedding</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">result = client.models.embed_content(
+    model=&quot;gemini-embedding-001&quot;,
+    contents=&quot;The bike&#x27;s front brake feels loose.&quot;,
+)
+vector = result.embeddings[0].values
+print(len(vector), vector[:5])  # e.g. 3072 dims, [0.0123, -0.0456, ...]</code></pre>
+</div>
+<div class="code-block">
+  <div class="code-head"><span>cosine_similarity.py</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">import numpy as np
+
+def cosine_similarity(a, b):
+    a, b = np.array(a), np.array(b)
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+sim = cosine_similarity(vector_a, vector_b)
+print(sim)  # closer to 1.0 = more semantically similar</code></pre>
+</div>
+<h3>3.1 Semantic search, minimal version</h3>
+<p>
+With embeddings and cosine similarity, we can already build a tiny "search engine" with no database at all:
+embed every candidate text once, embed the query, and rank candidates by similarity to the query. This exact
+pattern &mdash; scaled up with a real vector store and a document-ingestion pipeline &mdash; <strong>is RAG</strong>,
+which is the entire subject of next week.
+</p>
+<figure class="diagram"><svg viewBox="0 0 860 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 2. Minimal semantic search: no vector database needed at small scale, just embeddings + cosine similarity."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Candidate texts</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">embed once, store vectors</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">User query</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">embed at query time</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Cosine similarity</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">rank candidates vs. query</text><line x1="624" y1="52.0" x2="668" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="668" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="754.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Top result(s)</text><text x="754.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">most semantically relevant</text></svg><figcaption>Figure 2. Minimal semantic search: no vector database needed at small scale, just embeddings + cosine similarity.</figcaption></figure>
+<div class="card note">
+  <h3>Engineering rule of thumb</h3>
+  <p>Semantic search finds text with similar <em>meaning</em>, not necessarily matching <em>keywords</em> &mdash; a
+  query for "brake problems" can retrieve a passage that says "the caliper wasn't gripping" even with zero
+  shared words. That's the whole point, and also why hybrid (keyword + semantic) search exists, which we'll cover
+  in Week 10.</p>
+</div>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (3/4): refactoring with Antigravity CLI</h3>
+  <p>
+  Your context-management code (sliding window, summarization) is a good candidate for a quick refactor pass.
+  In a terminal, run <code class="inline">agy</code> inside your project and try:
+  </p>
+  <blockquote>"Look at my `compact_context` function and add a guard so it never calls the summarization LLM if
+  the history is already empty, plus a docstring explaining the token-cost tradeoff."</blockquote>
+  <p>
+  Use <code class="inline">/rewind</code> if a suggested change isn't what you wanted &mdash; it steps the
+  conversation (and its edits) back so you can redirect without starting over. This is the same "propose a diff,
+  review, accept" loop you practiced in Week 2, now applied to refactoring existing code instead of scaffolding
+  new files.
+  </p>
+</div>
+
+<h2>4. Today's Notebook</h2>
+<p>Open <code class="inline">week-03-context-engineering-ii.ipynb</code> and work through, in order:</p>
+<ol>
+  <li>A growing conversation history and the sliding-window function applied to it.</li>
+  <li>Rolling summarization applied to the same history, compared side by side.</li>
+  <li>Generating embeddings and computing cosine similarity between related and unrelated sentences.</li>
+  <li>A minimal semantic search function over ~8 short candidate texts.</li>
+  <li>The same "compact the conversation" step reproduced as a light ADK/LangChain preview.</li>
+  <li>Open exercises.</li>
+</ol>
+
+<h2>5. Key Takeaways &amp; Glossary</h2>
+<ul>
+  <li>Context windows are a hard limit with real cost, latency, and quality consequences &mdash; not just a memory quirk.</li>
+  <li><strong>Sliding window</strong> is cheap and simple but permanently discards old information.</li>
+  <li><strong>Summarization</strong> preserves information at lower token cost, at the price of an extra LLM call.</li>
+  <li><strong>Structured memory extraction</strong> compresses even further into queryable facts.</li>
+  <li><strong>Embeddings</strong> let us compare meaning, not just characters, via <strong>cosine similarity</strong>.</li>
+  <li>Embeddings + similarity ranking over candidate texts is the minimal seed of what RAG formalizes next week.</li>
+</ul>
+<dl class="glossary">
+  <dt>Context window</dt><dd>The maximum combined input+output tokens a model can process in one call.</dd>
+  <dt>Lost in the middle</dt><dd>The observed tendency of long-context models to recall information less reliably when it sits in the middle of a long input.</dd>
+  <dt>Sliding window (context)</dt><dd>Keeping only the most recent N turns/tokens of a conversation.</dd>
+  <dt>Rolling summarization</dt><dd>Periodically compressing older conversation turns into a running summary.</dd>
+  <dt>Embedding model</dt><dd>A model that maps a piece of text to a vector representing its meaning.</dd>
+  <dt>Cosine similarity</dt><dd>A measure of the angle between two vectors, used to score how semantically similar two texts are.</dd>
+</dl>
+
+<h2>6. Further Reading</h2>
+<ul class="further-reading">
+  <li>Huyen, C. (2025). <em>AI Engineering.</em> <span class="src">O'Reilly Media &mdash; chapters on context construction and retrieval.</span></li>
+  <li>Gemini API docs &mdash; embeddings. <span class="src"><a href="https://ai.google.dev" target="_blank" rel="noopener">ai.google.dev</a></span></li>
+  <li>Lewis, P. et al. (2020). <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</em> <span class="src"><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">arXiv:2005.11401</a> &mdash; preview reading for next week's RAG lesson.</span></li>
+  <li>Google Antigravity CLI docs. <span class="src"><a href="https://antigravity.google/docs/cli/overview" target="_blank" rel="noopener">antigravity.google/docs/cli</a></span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 3: Context Engineering II. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

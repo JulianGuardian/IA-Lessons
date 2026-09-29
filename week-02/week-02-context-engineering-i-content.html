@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 2: Context Engineering I &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 1 &middot; Fundamentals of LLMs, Context Engineering &amp; RAG</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-02-context-engineering-i-content.html">Lesson content</a>
+  <a class="" href="week-02-context-engineering-i-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-01-llm-fundamentals-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 1: LLM Fundamentals</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 2: Context Engineering I</span></span>
+<a class="step next" href="week-03-context-engineering-ii-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 3: Context Engineering II</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    <div class="box">
+  <h2>Notebook</h2>
+  <ul><li><a href="../notebooks/week-02-context-engineering-i.ipynb" target="_blank" rel="noopener">Open week 02 Jupyter notebook &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 1 &middot; Week 2 of 16</p>
+    <h1 class="lesson-title">Context Engineering I</h1>
+    <p class="lesson-lede">System prompts, few-shot examples, chain-of-thought reasoning, and forcing reliable JSON output from an LLM.</p>
+    
+<div class="card objectives">
+  <h3>Learning objectives</h3>
+  <ul>
+    <li>Explain the shift from "prompt engineering" to "context engineering" and why it matters for engineered systems, not just chat.</li>
+    <li>Write an effective system prompt that separates role/behavior instructions from the user's actual request.</li>
+    <li>Use few-shot examples to steer output format and style without fine-tuning.</li>
+    <li>Apply chain-of-thought prompting to improve multi-step reasoning, and recognize when it's unnecessary overhead.</li>
+    <li>Force an LLM to return valid, schema-conformant JSON using Gemini's structured output mode.</li>
+  </ul>
+</div>
+
+<h2>1. From Prompt Engineering to Context Engineering</h2>
+<p>
+Last week we treated the prompt as a single string. In real systems, what you send to the model is rarely just
+"the user's question" &mdash; it's a carefully assembled package: instructions about how to behave, examples of the
+desired output, retrieved facts, conversation history, and finally the user's request. <strong>Context engineering</strong>
+is the discipline of designing and managing everything inside that context window, deliberately, as a first-class
+engineering artifact &mdash; not something you improvise in a text box.
+</p>
+<figure class="diagram"><svg viewBox="0 0 644 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1. Anatomy of a well-engineered context window. Not every call needs every layer."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">System prompt</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">role, rules, constraints</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Few-shot examples</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">optional, shows format</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Retrieved context</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">optional, from RAG (Week 4+)</text><line x1="538.0" y1="84" x2="538.0" y2="130" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="20" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Conversation history</text><text x="106.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">optional, prior turns</text><line x1="192" y1="162.0" x2="236" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">User message</text><text x="322.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">the actual request</text></svg><figcaption>Figure 1. Anatomy of a well-engineered context window. Not every call needs every layer.</figcaption></figure>
+<p>
+Today we build the first two layers &mdash; system prompts and few-shot examples &mdash; plus two techniques that
+change <em>how</em> the model reasons and responds: chain-of-thought and structured JSON output. Retrieved
+context and long conversation history are Weeks 3&ndash;4.
+</p>
+
+<h2>2. System Prompts</h2>
+<p>
+A <strong>system prompt</strong> (or <em>system instruction</em>) sets persistent behavior for the whole
+conversation: role, tone, constraints, output format, things to refuse. It is passed separately from the user
+message so the model can weight it differently and so your application code never has to re-state the same
+rules on every turn.
+</p>
+<h3>2.1 What belongs in a system prompt</h3>
+<ul>
+  <li><strong>Role and persona</strong>: "You are a customer support assistant for a bike rental company."</li>
+  <li><strong>Scope and refusals</strong>: "Only answer questions about bike rentals; if asked anything else, say you can't help with that."</li>
+  <li><strong>Style and format rules</strong>: "Keep answers under 3 sentences. Never use emoji."</li>
+  <li><strong>Tool/behavior instructions</strong> (more relevant from Week 6 onward, once agents have tools).</li>
+</ul>
+<h3>2.2 What doesn't belong there</h3>
+<p>
+Anything that changes per request &mdash; the actual question, retrieved documents, this turn's data &mdash; belongs in
+the <strong>user</strong> message or a separate context block, not baked into the system prompt. Mixing the two
+makes your system prompt balloon and your application harder to reason about and test.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>system_instruction example</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">response = client.models.generate_content(
+    model=MODEL,
+    contents=&quot;My bike&#x27;s front brake feels loose, what should I check?&quot;,
+    config=types.GenerateContentConfig(
+        system_instruction=(
+            &quot;You are a support assistant for a bike rental company. &quot;
+            &quot;Only answer questions related to bike rentals, maintenance, and safety. &quot;
+            &quot;Keep answers under 3 sentences. If asked something unrelated, politely decline.&quot;
+        ),
+    ),
+)
+print(response.text)</code></pre>
+</div>
+<div class="card note">
+  <h3>Engineering rule of thumb</h3>
+  <p>Treat your system prompt like source code: version it, keep it in a file (not a hardcoded string scattered
+  across the codebase), and change one instruction at a time so you can tell what broke or improved.</p>
+</div>
+
+<h2>3. Few-Shot Prompting</h2>
+<p>
+<strong>Zero-shot</strong> prompting asks the model to do a task with instructions alone. <strong>Few-shot</strong>
+prompting adds a handful of worked examples (input &rarr; desired output pairs) directly in the prompt. The model
+doesn't "learn" in the training sense &mdash; it's pattern-matching the shape of your examples for this single call,
+a mechanism often called <strong>in-context learning</strong>.
+</p>
+<p>Few-shot is most useful when:</p>
+<ul>
+  <li>The desired output <strong>format</strong> is unusual or specific (a particular label taxonomy, a terse style, a non-obvious structure).</li>
+  <li>Instructions alone are ambiguous, but "show, don't tell" resolves the ambiguity in one example.</li>
+  <li>You need consistency across many similar calls (e.g. classifying support tickets the same way every time).</li>
+</ul>
+<div class="code-block">
+  <div class="code-head"><span>few-shot sentiment classifier</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">prompt = &#x27;&#x27;&#x27;Classify the sentiment of a review as positive, negative, or neutral.
+
+Review: &quot;Fast shipping and the product works great.&quot;
+Sentiment: positive
+
+Review: &quot;It arrived broken and support never replied.&quot;
+Sentiment: negative
+
+Review: &quot;It&#x27;s fine, does what it says on the box.&quot;
+Sentiment: neutral
+
+Review: &quot;Absolutely love it, exceeded expectations!&quot;
+Sentiment:&#x27;&#x27;&#x27;
+
+response = client.models.generate_content(model=MODEL, contents=prompt)
+print(response.text.strip())  # -&gt; positive</code></pre>
+</div>
+<p>
+Keep example counts small (2&ndash;5 is typical) and representative of the edge cases you actually care about &mdash;
+more examples cost more tokens without necessarily improving quality, and can even bias the model toward
+whatever pattern happens to repeat in your examples (e.g. always picking the last label shown).
+</p>
+
+<h2>4. Chain-of-Thought Prompting</h2>
+<p>
+<strong>Chain-of-thought (CoT)</strong> prompting asks the model to work through intermediate reasoning steps
+before giving a final answer, instead of jumping straight to a conclusion (Yao et al., 2022, and the broader CoT
+literature it builds on &mdash; see Further Reading). For multi-step arithmetic, logic, or planning tasks, this
+measurably improves accuracy, because it gives the model "room" to build up an answer token by token instead of
+having to get it right in one shot.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>chain-of-thought example</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">prompt = &#x27;&#x27;&#x27;A store had 120 apples. It sold 35% of them in the morning and 28 more in the afternoon.
+How many apples are left? Think step by step, then give the final answer on its own line
+starting with &quot;Answer:&quot;.&#x27;&#x27;&#x27;
+
+response = client.models.generate_content(
+    model=MODEL, contents=prompt,
+    config=types.GenerateContentConfig(temperature=0.1),
+)
+print(response.text)</code></pre>
+</div>
+<div class="card warn">
+  <h3>When CoT is <em>not</em> worth it</h3>
+  <p>
+  For simple lookups, classification, or extraction, forcing step-by-step reasoning just adds latency and token
+  cost without improving quality &mdash; and makes the output harder to parse programmatically. It's also largely
+  redundant on models with built-in "thinking"/reasoning modes, which already reason internally before answering.
+  Reach for explicit CoT when a task genuinely has multiple dependent steps.
+  </p>
+</div>
+
+<h2>5. Structuring Output: JSON Mode &amp; Schema Forcing</h2>
+<p>
+The moment an LLM's output feeds into <em>code</em> rather than a human, you need it to come back in a
+predictable shape. Asking nicely ("please respond in JSON") is not reliable enough for production &mdash; models
+add prose before/after the JSON, use trailing commas, or rename fields. The fix is <strong>structured output</strong>:
+you give the API a schema, and the model is constrained to only produce output matching it.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>schema-forced JSON output</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from pydantic import BaseModel
+
+class TicketTriage(BaseModel):
+    category: str        # &quot;billing&quot; | &quot;technical&quot; | &quot;account&quot; | &quot;other&quot;
+    urgency: str          # &quot;low&quot; | &quot;medium&quot; | &quot;high&quot;
+    summary: str
+
+response = client.models.generate_content(
+    model=MODEL,
+    contents=&quot;My card was charged twice for the same order and I need this fixed today.&quot;,
+    config=types.GenerateContentConfig(
+        response_mime_type=&quot;application/json&quot;,
+        response_schema=TicketTriage,
+    ),
+)
+
+import json
+data = json.loads(response.text)
+print(data)
+# or, even more convenient:
+ticket: TicketTriage = response.parsed
+print(ticket.category, ticket.urgency)</code></pre>
+</div>
+<p>
+Two settings work together here: <code class="inline">response_mime_type="application/json"</code> tells the API
+you want JSON back, and <code class="inline">response_schema</code> (a Pydantic model, dataclass, or explicit
+JSON-schema dict) constrains <em>which</em> JSON. The SDK will even parse it back into a typed object for you via
+<code class="inline">response.parsed</code>. This single feature is what makes reliable function calling, tool
+use, and agent planning possible &mdash; we'll lean on it heavily from Week 6 onward.
+</p>
+<div class="card note">
+  <h3>Engineering rule of thumb</h3>
+  <p>Combine schema forcing with <strong>low temperature</strong>. Structure controls the shape; temperature still
+  controls the wording inside string fields, and low variance there makes downstream parsing and testing far more
+  reliable.</p>
+</div>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (2/4): scaffolding prompt files with Antigravity CLI</h3>
+  <p>
+  Now that your system prompts are becoming real artifacts worth version-controlling, use <code class="inline">agy</code>
+  to scaffold them. Open a terminal in your project folder and run <code class="inline">agy</code>, then try a
+  request like:
+  </p>
+  <blockquote>"Create a `prompts/` folder with a `support_agent_system_prompt.txt` file containing a system
+  prompt for a bike-rental support assistant, and a short `prompts/README.md` explaining how to edit it."</blockquote>
+  <p>
+  Review the proposed diff before accepting it &mdash; Antigravity CLI shows you exactly what files it plans to
+  create or change before writing anything, which is the habit you want when any AI tool is producing code or
+  content changes on your behalf.
+  </p>
+</div>
+
+<h2>6. Today's Notebook</h2>
+<p>Open <code class="inline">week-02-context-engineering-i.ipynb</code> and work through, in order:</p>
+<ol>
+  <li>System prompt vs. no system prompt, same user question, side by side.</li>
+  <li>A zero-shot vs. few-shot comparison on a small classification task.</li>
+  <li>A chain-of-thought vs. direct-answer comparison on a multi-step word problem.</li>
+  <li>Schema-forced JSON output using a Pydantic model, plus the ADK and LangChain equivalents.</li>
+  <li>Open exercises.</li>
+</ol>
+
+<h2>7. Key Takeaways &amp; Glossary</h2>
+<ul>
+  <li><strong>Context engineering</strong> generalizes prompt engineering to everything in the context window: system prompt, examples, retrieved data, history, and the request.</li>
+  <li>A <strong>system prompt</strong> holds persistent behavior; the <strong>user message</strong> holds what changes per call.</li>
+  <li><strong>Few-shot</strong> examples are the fastest way to fix output format/style without fine-tuning.</li>
+  <li><strong>Chain-of-thought</strong> helps on genuinely multi-step reasoning tasks; it's overhead on simple ones.</li>
+  <li><strong>Schema-forced JSON output</strong> turns unreliable free text into a typed, parseable contract your code can depend on.</li>
+</ul>
+<dl class="glossary">
+  <dt>System prompt</dt><dd>Persistent instructions defining role, tone, and constraints, sent separately from the user message.</dd>
+  <dt>Zero-shot / Few-shot</dt><dd>Prompting with instructions alone vs. with worked input&rarr;output examples included.</dd>
+  <dt>In-context learning</dt><dd>The model adapting its behavior to patterns shown within a single prompt, without weight updates.</dd>
+  <dt>Chain-of-thought (CoT)</dt><dd>Prompting the model to produce intermediate reasoning steps before a final answer.</dd>
+  <dt>Structured output / schema forcing</dt><dd>Constraining a model's response to conform to a given JSON schema.</dd>
+</dl>
+
+<h2>8. Further Reading</h2>
+<ul class="further-reading">
+  <li>Huyen, C. (2025). <em>AI Engineering.</em> <span class="src">O'Reilly Media &mdash; chapter on prompt engineering and structured outputs.</span></li>
+  <li>Yao, S. et al. (2022). <em>ReAct: Synergizing Reasoning and Acting in Language Models.</em> <span class="src"><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">arXiv:2210.03629</a> &mdash; reasoning traces preview for Week 6.</span></li>
+  <li>Gemini API docs &mdash; structured output / JSON mode. <span class="src"><a href="https://ai.google.dev" target="_blank" rel="noopener">ai.google.dev</a></span></li>
+  <li>Google Antigravity CLI docs. <span class="src"><a href="https://antigravity.google/docs/cli/overview" target="_blank" rel="noopener">antigravity.google/docs/cli</a></span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 2: Context Engineering I. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>
