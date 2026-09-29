@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8: Multi-Agent Systems &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 2 &middot; Agents, Multi-Agent Systems &amp; LangGraph</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-08-multi-agent-systems-content.html">Lesson content</a>
+  <a class="" href="week-08-multi-agent-systems-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-07-google-adk-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 7: Google ADK</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 8: Multi-Agent Systems</span></span>
+<a class="step next" href="week-09-langgraph-i-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 9: LangGraph I</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    
+    <div class="box">
+  <h2>Runnable code</h2>
+  <ul><li><a href="../agents/week-08-multi-agent-systems/" target="_blank" rel="noopener">Open week 08 agent apps &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 2 &middot; Week 8 of 16</p>
+    <h1 class="lesson-title">Multi-Agent Systems with ADK</h1>
+    <p class="lesson-lede">Orchestrator-specialist patterns, the sub_agents-vs-AgentTool decision, and ADK's deterministic workflow agents for pipelines and swarms.</p>
+    
+<div class="card objectives">
+  <h3>By the end of this lesson, you will be able to</h3>
+  <ul>
+    <li>Explain why a single agent with too many tools and instructions degrades, and how specialization fixes it.</li>
+    <li>Contrast ADK's two delegation mechanisms: <code class="inline">sub_agents</code> (handoff, child owns the
+    conversation) and <code class="inline">AgentTool</code> (isolated call, child returns a string).</li>
+    <li>Use ADK's workflow agents (<code class="inline">SequentialAgent</code>, <code class="inline">ParallelAgent</code>,
+    <code class="inline">LoopAgent</code>) to implement a fixed pipeline instead of LLM-driven routing.</li>
+    <li>Build an orchestrator with specialist sub-agents, both ways, in ADK; build the AgentTool-equivalent pattern in LangChain.</li>
+  </ul>
+</div>
+
+<h2>1. Why split one agent into many?</h2>
+<p>
+A single agent with fifteen tools and an instruction paragraph covering five unrelated responsibilities tends to
+mis-route: it calls the wrong tool, forgets constraints buried on line 12, or blends two tasks into one confused
+reply. <strong>Specialization</strong> fixes this the same way it does in human teams: give each agent a narrow job,
+a short focused instruction, and only the tools it needs. A coordinator then reads the user's intent and delegates.
+</p>
+<figure class="diagram"><svg viewBox="0 0 644 104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Orchestrator-specialists: one coordinator, focused sub-agents"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Coordinator</text><text x="106.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">reads intent, routes</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Specialist A</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">narrow job, few tools</text><line x1="408" y1="52.0" x2="452" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="452" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="538.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Specialist B</text><text x="538.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">narrow job, few tools</text></svg><figcaption>Orchestrator-specialists: one coordinator, focused sub-agents</figcaption></figure>
+<p>This is also a grading concern: your Corte 2 project rubric explicitly rewards "architectural clarity in the
+systems built" &mdash; a coordinator plus two or three well-scoped specialists is far easier to defend live than one
+agent with an ever-growing instruction string.</p>
+
+<h2>2. Two ways to delegate in ADK</h2>
+<p>ADK gives you two distinct mechanisms, and picking the wrong one for the job is the most common multi-agent bug
+students hit:</p>
+<table>
+  <thead><tr><th></th><th><code class="inline">sub_agents</code> (handoff)</th><th><code class="inline">AgentTool</code></th></tr></thead>
+  <tbody>
+    <tr><td>Who owns the conversation after delegating?</td><td>The child agent &mdash; control transfers</td><td>The parent &mdash; child runs in isolation and returns</td></tr>
+    <tr><td>What comes back to the parent?</td><td>Nothing directly; the child replies to the user</td><td>A string result, which the parent synthesizes into its own reply</td></tr>
+    <tr><td>Good for</td><td>"This whole topic belongs to a different specialist now" (e.g. billing vs. tech support)</td><td>"I need one focused sub-task's answer to keep working" (e.g. a research lookup)</td></tr>
+  </tbody>
+</table>
+<h3>sub_agents: LLM-driven handoff</h3>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">research_agent = Agent(
+    name=&quot;research_agent&quot;,
+    model=&quot;gemini-flash-latest&quot;,
+    description=&quot;Looks up facts about the AI Agentic Engineering course schedule.&quot;,  # the ONLY thing the router reads
+    tools=[get_course_topic],
+)
+
+orchestrator = Agent(
+    name=&quot;orchestrator&quot;,
+    model=&quot;gemini-flash-latest&quot;,
+    instruction=&quot;Delegate schedule questions to research_agent. Handle everything else yourself.&quot;,
+    sub_agents=[research_agent],   # ADK&#x27;s AutoFlow routes based on each child&#x27;s description
+)</code></pre>
+</div>
+<p>The <code class="inline">description</code> field is not documentation for humans &mdash; it is the coordinator's
+only signal for when to route to that child. Vague descriptions cause silent mis-routing.</p>
+<h3>AgentTool: isolated call-and-return</h3>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google.adk.tools.agent_tool import AgentTool
+
+research_agent = Agent(name=&quot;research_agent&quot;, model=&quot;gemini-flash-latest&quot;, tools=[get_course_topic])
+
+orchestrator = Agent(
+    name=&quot;orchestrator&quot;,
+    model=&quot;gemini-flash-latest&quot;,
+    instruction=&quot;Use research_agent as a tool whenever you need schedule facts, then keep working.&quot;,
+    tools=[AgentTool(research_agent)],   # wrapped like any other function tool
+)</code></pre>
+</div>
+<p>Use <code class="inline">AgentTool</code> when the parent needs to keep control &mdash; e.g. it must combine the
+specialist's answer with something else before replying.</p>
+
+<h2>3. Workflow agents: fixed pipelines instead of LLM routing</h2>
+<p>
+Sometimes you do not want the LLM deciding the order at all &mdash; you want a guaranteed sequence (the syllabus's
+"pipeline" pattern). ADK ships three workflow agents that orchestrate children <strong>deterministically</strong>,
+with no routing LLM call in between:
+</p>
+<ul>
+  <li><code class="inline">SequentialAgent</code> &mdash; runs children in a fixed order, one after another (a pipeline).</li>
+  <li><code class="inline">ParallelAgent</code> &mdash; runs children concurrently (a "swarm" that fans out, then you merge results).</li>
+  <li><code class="inline">LoopAgent</code> &mdash; re-runs a child until a condition is met or a max-iteration count is hit.</li>
+</ul>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from google.adk.agents import SequentialAgent
+
+pipeline = SequentialAgent(
+    name=&quot;research_then_plan_pipeline&quot;,
+    sub_agents=[research_agent, planner_agent],   # always research_agent first, planner_agent second
+)</code></pre>
+</div>
+<p>Prefer a workflow agent over LLM-driven <code class="inline">sub_agents</code> whenever the order is known in
+advance &mdash; it is cheaper (fewer routing calls) and cannot mis-route.</p>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (3/5): Google Antigravity CLI &mdash; scaffolding a specialist agent</h3>
+  <p>Once your orchestrator exists, growing the team is a repetitive, well-specified task &mdash; a good fit for Antigravity:</p>
+  <div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">agy
+&gt; In adk/orchestrator_subagents_agent/, add a new sibling agent module &quot;scheduling_agent.py&quot;
+  with a root-level scheduling_agent variable (Agent, model=&quot;gemini-flash-latest&quot;) that has one
+  tool for suggesting a study day given a difficulty. Then add it to orchestrator&#x27;s sub_agents list
+  in agent.py and update its instruction to mention when to delegate to it.</code></pre>
+</div>
+  <p>Multi-agent code is where over-trusting generated code is most costly &mdash; a wrong <code class="inline">description</code>
+  string silently breaks routing without raising an error. Test every new specialist with a prompt that should route
+  to it before moving on.</p>
+</div>
+
+<h2>Glossary</h2>
+<dl class="glossary">
+  <dt>Orchestrator / coordinator</dt><dd>The top-level agent that reads user intent and delegates to specialists.</dd>
+  <dt>sub_agents (handoff)</dt><dd>ADK delegation where control transfers to the child; the child replies directly to the user.</dd>
+  <dt>AgentTool</dt><dd>ADK delegation where the child runs in isolation and returns a string the parent must synthesize.</dd>
+  <dt>SequentialAgent / ParallelAgent / LoopAgent</dt><dd>ADK workflow agents that orchestrate children deterministically, without an LLM routing call.</dd>
+  <dt>Pipeline pattern</dt><dd>A fixed, ordered sequence of agents (implemented with SequentialAgent).</dd>
+  <dt>Swarm pattern</dt><dd>Peer agents that can hand off to one another rather than reporting to a single coordinator.</dd>
+</dl>
+
+<h2>Further reading</h2>
+<ul class="further-reading">
+  <li>Google Developers Blog &mdash; A developer's guide to multi-agent patterns in ADK. <span class="src">developers.googleblog.com</span></li>
+  <li>Google ADK documentation &mdash; Multi-agent systems. <span class="src">developers.google.com/adk</span></li>
+  <li>Google Cloud blog &mdash; Building collaborative AI: a developer's guide to multi-agent systems with ADK. <span class="src">cloud.google.com/blog</span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 8: Multi-Agent Systems. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate','uvicorn'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>
