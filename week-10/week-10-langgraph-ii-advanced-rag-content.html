@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 10: LangGraph II + Advanced RAG &middot; Content | AI Agentic Engineering</title>
+<style>
+:root{
+  --bg:#f4f8fd;
+  --bg-elevated:#ffffff;
+  --text:#0a2540;
+  --text-muted:#4c6076;
+  --primary:#0352a6;
+  --primary-dark:#023262;
+  --primary-light:#e3edfb;
+  --accent:#7a5800;
+  --accent-light:#fff6d6;
+  --accent-solid:#ffd100;
+  --border:#d7e3f5;
+  --code-bg:#0a2540;
+  --code-text:#e7eef8;
+  --warn:#b45309;
+  --warn-light:#fef3e2;
+  --success:#15803d;
+  --success-light:#eafaf0;
+  --danger:#b91c1c;
+  --danger-light:#fdecec;
+  --radius:12px;
+  --max-w:840px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0a1929;
+    --bg-elevated:#0f2540;
+    --text:#eef3fa;
+    --text-muted:#a9bbd6;
+    --primary:#5b9ce6;
+    --primary-dark:#8ec0f5;
+    --primary-light:#173259;
+    --accent:#ffd100;
+    --accent-light:#3a2f00;
+    --accent-solid:#ffd100;
+    --border:#1f3a5f;
+    --code-bg:#081422;
+    --code-text:#e7eef8;
+    --warn:#fbbf24;
+    --warn-light:#332707;
+    --success:#4ade80;
+    --success-light:#0d2417;
+    --danger:#f87171;
+    --danger-light:#2e1414;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);}
+a:hover{color:var(--primary-dark);}
+img{max-width:100%;}
+code{font-family:"SF Mono",Consolas,Menlo,monospace;}
+
+/* ---- Top header ---- */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 2px 0 0 var(--accent-solid);
+}
+.site-header .band{
+  max-width:1200px; margin:0 auto; padding:.6rem 1.25rem;
+}
+.brand-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.brand{
+  font-weight:700; font-size:1.05rem; letter-spacing:.2px;
+}
+.brand small{
+  display:block; font-weight:400; color:var(--text-muted); font-size:.78rem; margin-top:2px;
+}
+.view-toggle{
+  display:flex; gap:.4rem; font-size:.82rem;
+}
+.view-toggle a{
+  padding:.3rem .7rem; border-radius:999px; border:1px solid var(--border);
+  text-decoration:none; color:var(--text-muted);
+}
+.view-toggle a.active{
+  background:var(--primary); border-color:var(--primary); color:#fff; font-weight:600;
+}
+.nav-stepper{
+  display:flex; align-items:stretch; gap:.5rem; margin-top:.6rem; flex-wrap:wrap;
+}
+.step{
+  flex:1 1 220px; min-width:0;
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:.5rem .75rem; font-size:.82rem; text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:.1rem;
+  background:var(--bg-elevated);
+}
+.step .tag{
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700;
+}
+.step .label{ font-weight:600; }
+.step.prev:hover{ border-color:var(--primary); }
+.step.current{
+  background:var(--primary-light); border-color:var(--primary);
+  box-shadow:inset 0 -3px 0 0 var(--accent-solid);
+}
+.step.current .tag{ color:var(--primary); }
+.step.disabled{
+  opacity:.55; cursor:default;
+}
+.step.next:hover{ border-color:var(--accent); }
+
+/* ---- Layout ---- */
+.layout{
+  max-width:1200px; margin:0 auto; padding:1.5rem 1.25rem 4rem;
+  display:grid; grid-template-columns:230px minmax(0,1fr); gap:2.5rem;
+  align-items:start;
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
+  .sidebar{ position:static; order:2; }
+}
+.sidebar{
+  position:sticky; top:5.7rem; align-self:start;
+  max-height:calc(100vh - 6.5rem); overflow-y:auto;
+  font-size:.85rem;
+}
+.sidebar h2{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  margin:0 0 .5rem;
+}
+.sidebar ul{ list-style:none; margin:0 0 1.5rem; padding:0; }
+.sidebar li{ margin:0; }
+.sidebar li.toc-sub{ margin-left:.9rem; }
+.sidebar a{
+  display:block; padding:.28rem 0; text-decoration:none; color:var(--text-muted); border-left:2px solid transparent; padding-left:.6rem;
+}
+.sidebar a:hover{ color:var(--primary); border-left-color:var(--primary); }
+.sidebar .box{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.85rem .9rem; margin-bottom:1.25rem;
+}
+.sidebar .box a{ padding:.15rem 0; }
+
+main{ min-width:0; }
+main > .lesson-title{
+  font-size:1.9rem; margin:.2rem 0 .3rem;
+}
+.lesson-kicker{
+  color:var(--accent); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em;
+}
+.lesson-lede{
+  color:var(--text-muted); font-size:1.05rem; margin:.5rem 0 1.75rem;
+}
+main h2{
+  font-size:1.4rem; margin:2.4rem 0 .8rem; padding-top:.4rem; border-top:1px solid var(--border);
+}
+main h2:first-of-type{ border-top:none; padding-top:0; }
+main h3{ font-size:1.12rem; margin:1.6rem 0 .6rem; }
+main p{ margin:.7rem 0; }
+main ul, main ol{ padding-left:1.4rem; }
+main li{ margin:.35rem 0; }
+
+.card{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin:1.1rem 0;
+}
+.card.objectives{ border-left:4px solid var(--primary); }
+.card.tooling{ border-left:4px solid var(--accent); background:var(--accent-light); }
+.card.warn{ border-left:4px solid var(--warn); background:var(--warn-light); }
+.card.note{ border-left:4px solid var(--primary); }
+.card h3{ margin-top:0; }
+.card.tooling h3{ display:flex; align-items:center; gap:.5rem; }
+
+.badge{
+  display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  padding:.15rem .5rem; border-radius:999px; background:var(--primary-light); color:var(--primary); margin-right:.4rem;
+}
+
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+th,td{ border:1px solid var(--border); padding:.5rem .65rem; text-align:left; vertical-align:top; }
+th{ background:var(--bg-elevated); }
+
+blockquote{
+  margin:1rem 0; padding:.6rem 1rem; border-left:4px solid var(--border); color:var(--text-muted); font-style:italic;
+}
+
+/* ---- Code blocks ---- */
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius); margin:1rem 0; overflow:hidden;
+  border:1px solid var(--border);
+}
+.code-block .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.4rem .8rem; background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:.72rem; color:#b7b7d0; text-transform:uppercase; letter-spacing:.06em;
+}
+.code-block button.copy-btn{
+  background:transparent; border:1px solid rgba(255,255,255,.25); color:#dcdcf0;
+  border-radius:6px; font-size:.68rem; padding:.15rem .5rem; cursor:pointer;
+}
+.code-block button.copy-btn:hover{ background:rgba(255,255,255,.12); }
+.code-block pre{ margin:0; padding:.9rem 1rem; overflow-x:auto; }
+.code-block code{ color:var(--code-text); font-size:.85rem; line-height:1.55; white-space:pre; }
+.tok-comment{ color:#7f849c; font-style:italic; }
+.tok-string{ color:#a6e3a1; }
+.tok-number{ color:#fab387; }
+.tok-keyword{ color:#89b4fa; font-weight:600; }
+
+code.inline{
+  background:var(--primary-light); color:var(--primary-dark); padding:.1rem .35rem; border-radius:5px; font-size:.88em;
+}
+
+.diagram{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin:1.2rem 0; text-align:center; overflow-x:auto;
+}
+.diagram svg{ max-width:100%; height:auto; }
+.diagram figcaption{ margin-top:.5rem; font-size:.8rem; color:var(--text-muted); }
+
+.glossary dt{ font-weight:700; margin-top:.7rem; }
+.glossary dd{ margin:.15rem 0 0; color:var(--text-muted); }
+
+.further-reading li{ margin:.5rem 0; }
+.further-reading .src{ color:var(--text-muted); font-size:.85rem; }
+
+footer.site-footer{
+  max-width:1200px; margin:2rem auto 0; padding:1.5rem 1.25rem 2.5rem;
+  color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border);
+}
+
+/* ---- Activities-specific ---- */
+.activity{
+  background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.2rem 1.4rem; margin:1.4rem 0;
+}
+.activity > .activity-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem;
+}
+.activity h2{ margin:0; border:none; padding:0; font-size:1.25rem; }
+.meta-pills{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pill{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px;
+}
+.pill.time{ background:var(--primary-light); color:var(--primary); }
+.pill.mode{ background:var(--accent-light); color:var(--accent); }
+.pill.grade{ background:var(--warn-light); color:var(--warn); }
+
+.quiz-q{
+  border:1px solid var(--border); border-radius:10px; padding:.8rem 1rem; margin:.8rem 0; background:var(--bg);
+}
+.quiz-q .quiz-prompt{ font-weight:600; margin:0 0 .5rem; }
+.quiz-q label{ display:block; padding:.25rem 0; cursor:pointer; }
+.quiz-q input{ margin-right:.5rem; }
+.quiz-q .quiz-explain{ display:none; margin-top:.6rem; padding:.5rem .7rem; border-radius:8px; font-size:.88rem; background:var(--primary-light); }
+.quiz-q.is-correct{ border-color:var(--success); }
+.quiz-q.is-correct .quiz-explain{ background:var(--success-light); }
+.quiz-q.is-incorrect{ border-color:var(--danger); }
+.quiz-q.is-incorrect .quiz-explain{ background:var(--danger-light); }
+.quiz-q.is-unanswered{ border-color:var(--warn); }
+.quiz-actions{ display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+button.primary-btn{
+  background:var(--primary); color:#fff; border:none; border-radius:8px; padding:.55rem 1.1rem;
+  font-size:.9rem; font-weight:600; cursor:pointer;
+}
+button.primary-btn:hover{ background:var(--primary-dark); }
+.quiz-score{ font-weight:700; }
+
+.checklist label{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0; cursor:pointer; }
+.checklist input{ margin-top:.3rem; }
+
+.rubric-table td:first-child, .rubric-table th:first-child{ width:28%; }
+
+.toc-toggle{ display:none; }
+@media (max-width:900px){
+  .toc-toggle{
+    display:inline-flex; margin-bottom:.8rem; background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:8px; padding:.4rem .8rem; font-size:.82rem; cursor:pointer; color:var(--text);
+  }
+  .sidebar.collapsed{ display:none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="band">
+    <div class="brand-row">
+      <div class="brand">AI Agentic Engineering<small>Corte 2 &middot; Agents, Multi-Agent Systems &amp; LangGraph</small></div>
+      <div class="view-toggle">
+  <a class="active" href="week-10-langgraph-ii-advanced-rag-content.html">Lesson content</a>
+  <a class="" href="week-10-langgraph-ii-advanced-rag-activities.html">Lab &amp; activities</a>
+</div>
+    </div>
+    <nav class="nav-stepper" aria-label="Lesson navigation">
+      <a class="step prev" href="week-09-langgraph-i-content.html"><span class="tag">&larr; Previous</span><span class="label">Week 9: LangGraph I</span></a>
+<span class="step current"><span class="tag">You are here</span><span class="label">Week 10: LangGraph II + Advanced RAG</span></span>
+<a class="step next" href="week-12-evaluation-content.html"><span class="tag">Next &rarr;</span><span class="label">Week 12: Evaluation</span></a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul id="toc-list"></ul>
+    </div>
+    
+    <div class="box">
+  <h2>Runnable code</h2>
+  <ul><li><a href="../agents/week-10-langgraph-ii-advanced-rag/" target="_blank" rel="noopener">Open week 10 agent apps &#8599;</a></li></ul>
+</div>
+    
+  </aside>
+
+  <main>
+    <button class="toc-toggle" id="toc-toggle" type="button">&#9776; On this page</button>
+    <p class="lesson-kicker">Corte 2 &middot; Week 10 of 16</p>
+    <h1 class="lesson-title">LangGraph II &amp; Advanced RAG</h1>
+    <p class="lesson-lede">Pausing a graph for human review, hybrid search, re-ranking, and wiring RAG into a graph node as one step of a larger agentic flow.</p>
+    
+<div class="card objectives">
+  <h3>By the end of this lesson, you will be able to</h3>
+  <ul>
+    <li>Pause a LangGraph run for human review with <code class="inline">interrupt()</code>, and resume it with
+    <code class="inline">Command(resume=...)</code>.</li>
+    <li>Explain hybrid search (vector + keyword) and why vector-only retrieval misses exact-match terms.</li>
+    <li>Add a re-ranking step that reorders retrieved chunks before generation.</li>
+    <li>Wire a full RAG pipeline into a LangGraph node, so retrieval becomes one step of an agentic flow instead
+    of a standalone script.</li>
+  </ul>
+</div>
+
+<h2>1. Human-in-the-loop with interrupt()</h2>
+<p>
+Not every agent decision should be fully autonomous. When your Corte 2 project (or a real deployment) makes a
+consequential choice &mdash; sending an email, deleting a record, or in today's case, answering from a
+low-confidence retrieval &mdash; you may want a human to approve it first. LangGraph supports this natively:
+<code class="inline">interrupt()</code> pauses a node mid-execution and saves the graph's state (via the checkpointer
+from Week 9); your application resumes it later with the human's decision.
+</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">from langgraph.types import interrupt, Command
+
+def review_node(state: RAGState) -&gt; dict:
+    if state[&quot;confidence&quot;] &lt; 0.6:
+        decision = interrupt({
+            &quot;question&quot;: state[&quot;question&quot;],
+            &quot;draft_answer&quot;: state[&quot;draft_answer&quot;],
+            &quot;ask&quot;: &quot;approve, edit, or reject this low-confidence answer&quot;,
+        })
+        return {&quot;final_answer&quot;: decision[&quot;edited_answer&quot;] if decision[&quot;action&quot;] == &quot;edit&quot; else decision.get(&quot;text&quot;, state[&quot;draft_answer&quot;])}
+    return {&quot;final_answer&quot;: state[&quot;draft_answer&quot;]}
+
+# ... elsewhere, after graph.invoke(...) returns with an interrupt pending:
+result = graph.invoke({&quot;question&quot;: &quot;...&quot;}, config=config)
+if &quot;__interrupt__&quot; in result:
+    print(result[&quot;__interrupt__&quot;])                       # show the pending review to a human
+    graph.invoke(Command(resume={&quot;action&quot;: &quot;approve&quot;}), config=config)  # continue with their decision</code></pre>
+</div>
+<p>Because this relies on the same checkpointer from Week 9, the pause can last arbitrarily long &mdash; even
+across process restarts, if you use a persistent checkpointer instead of <code class="inline">InMemorySaver</code>.</p>
+
+<h2>2. Hybrid search: vector + keyword</h2>
+<p>
+Week 4's RAG system retrieved purely by embedding similarity. That fails for queries containing exact tokens
+embeddings blur together &mdash; error codes, course codes, exact function names, IDs. <strong>Hybrid search</strong>
+runs a keyword search (e.g. BM25, or ChromaDB's built-in full-text filtering) <em>alongside</em> vector search and
+merges the two ranked lists, so an exact match on "ADK-1039" is not drowned out by semantically-similar-but-wrong chunks.
+</p>
+<figure class="diagram"><svg viewBox="0 0 428 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hybrid search: two retrieval paths merged before generation"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent-solid)"/></marker></defs><rect x="20" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="56.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Query</text><line x1="192" y1="52.0" x2="236" y2="52.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="20" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="49.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Vector search</text><text x="322.0" y="65.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">top-k by embedding similarity</text><line x1="322.0" y1="84" x2="322.0" y2="130" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="20" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="106.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Keyword search</text><text x="106.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">top-k by exact/BM25 match</text><line x1="192" y1="162.0" x2="236" y2="162.0" stroke="var(--accent-solid)" stroke-width="1.5" marker-end="url(#arrow)"/><rect x="236" y="130" width="172" height="64" rx="10" fill="var(--bg-elevated)" stroke="var(--primary)" stroke-width="1.5"/><text x="322.0" y="159.0" text-anchor="middle" font-size="12.5" font-weight="700" fill="currentColor">Merge + re-rank</text><text x="322.0" y="175.0" text-anchor="middle" font-size="10.5" fill="currentColor" opacity="0.65">combined ranked list</text></svg><figcaption>Hybrid search: two retrieval paths merged before generation</figcaption></figure>
+<p>A simple, dependency-free merge strategy: run both searches, then combine with
+<a href="https://en.wikipedia.org/wiki/Reciprocal_rank_fusion" target="_blank" rel="noopener">reciprocal rank fusion</a>
+(sum <code class="inline">1 / (60 + rank)</code> per chunk across both lists, re-sort by the combined score).</p>
+
+<h2>3. Re-ranking</h2>
+<p>
+Retrieval optimizes for recall (find plausible candidates fast); re-ranking optimizes for precision (put the
+<em>best</em> few first). A dedicated cross-encoder model scores each (query, chunk) pair jointly &mdash; more
+accurate than embedding similarity alone, but too slow to run over an entire corpus, so you retrieve a wider top-k
+first, then re-rank just those:
+</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python"># Free, local re-ranking with a small cross-encoder (no paid API required)
+from sentence_transformers import CrossEncoder
+
+reranker = CrossEncoder(&quot;cross-encoder/ms-marco-MiniLM-L-6-v2&quot;)  # small, CPU-friendly
+
+def rerank(query: str, chunks: list[str], top_k: int = 3) -&gt; list[str]:
+    scores = reranker.predict([(query, c) for c in chunks])
+    ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
+    return [chunk for _, chunk in ranked[:top_k]]</code></pre>
+</div>
+<p>If you would rather avoid an extra local model, an LLM call ("given this question, rank these 6 passages from
+most to least relevant") works too &mdash; slower and costs a call, but zero extra dependencies. Use whichever fits
+your Corte 2 project's constraints; both are legitimate for the rubric below.</p>
+
+<h2>4. RAG as a graph node</h2>
+<p>Wiring Week 4's RAG pipeline into a LangGraph node is mostly a matter of moving it from a standalone function
+into a node signature, so it can sit alongside other agentic steps (tool calls, human review, other specialists):</p>
+<div class="code-block">
+  <div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="python">class RAGState(TypedDict):
+    question: str
+    chunks: list[str]
+    draft_answer: str
+    confidence: float
+    final_answer: str
+
+def retrieve_node(state: RAGState) -&gt; dict:
+    vector_hits = collection.query(query_embeddings=[embed(state[&quot;question&quot;])], n_results=8)[&quot;documents&quot;][0]
+    keyword_hits = keyword_search(state[&quot;question&quot;], top_k=8)          # your BM25 / full-text search
+    merged = reciprocal_rank_fusion(vector_hits, keyword_hits)
+    return {&quot;chunks&quot;: rerank(state[&quot;question&quot;], merged, top_k=3)}
+
+def generate_node(state: RAGState) -&gt; dict:
+    context = &quot;\n\n&quot;.join(state[&quot;chunks&quot;])
+    response = llm.invoke(f&quot;Answer using ONLY this context:\n{context}\n\nQuestion: {state[&#x27;question&#x27;]}&quot;)
+    return {&quot;draft_answer&quot;: response.content, &quot;confidence&quot;: estimate_confidence(response, state[&quot;chunks&quot;])}</code></pre>
+</div>
+<p>
+Now RAG is one replaceable step in a graph you can extend: a Week 9-style conditional edge can send low-confidence
+answers to the <code class="inline">review_node</code> from Section 1 instead of straight to the user.
+</p>
+
+<div class="card tooling">
+  <h3>&#9881;&#65039; Tooling corner (5/5): Google Antigravity CLI &mdash; generating a reciprocal rank fusion helper</h3>
+  <div class="code-block">
+  <div class="code-head"><span>terminal</span><button class="copy-btn" type="button">Copy</button></div>
+  <pre><code data-lang="bash">agy
+&gt; Add a function reciprocal_rank_fusion(list_a: list[str], list_b: list[str], k: int = 60) -&gt; list[str]
+  to rag_utils.py that merges two ranked lists of chunk strings using reciprocal rank fusion and
+  returns a single re-sorted list with duplicates removed, keeping first occurrence order for ties.</code></pre>
+</div>
+  <p>This is the last Antigravity installment for Corte 2 &mdash; by now you should default to asking it for
+  well-specified, testable helper functions like this one, and always sanity-check the output against a
+  known small example before trusting it in your project.</p>
+</div>
+
+<h2>Glossary</h2>
+<dl class="glossary">
+  <dt>interrupt()</dt><dd>Pauses a LangGraph node and saves state via the checkpointer, awaiting a human decision.</dd>
+  <dt>Command(resume=...)</dt><dd>Resumes an interrupted graph run with the human's decision.</dd>
+  <dt>Hybrid search</dt><dd>Combining vector similarity search with keyword/exact-match search, merged into one ranked list.</dd>
+  <dt>Reciprocal rank fusion</dt><dd>A simple, weight-free method for merging two ranked lists by summing 1/(k+rank) per item.</dd>
+  <dt>Re-ranking</dt><dd>A second, more precise scoring pass over a retrieval's top-k results, using a cross-encoder or an LLM.</dd>
+</dl>
+
+<h2>Further reading</h2>
+<ul class="further-reading">
+  <li>LangGraph documentation &mdash; Human-in-the-loop / interrupts. <span class="src">docs.langchain.com/oss/python/langgraph/interrupts</span></li>
+  <li>Sentence-Transformers &mdash; Cross-Encoders for re-ranking. <span class="src">sbert.net</span></li>
+  <li>Lewis et al., 2020. <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</em> <span class="src">arxiv.org/abs/2005.11401</span></li>
+</ul>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  AI Agentic Engineering &mdash; Facultad de Ingenier&iacute;as, Ingenier&iacute;a de Sistemas, Universidad de Santander.
+  Generated teaching material for Week 10: LangGraph II + Advanced RAG. Sources are cited in each &ldquo;Further reading&rdquo; section.
+</footer>
+
+<script>
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightCode(code, lang){
+  var keywordSets = {
+    python: ['def','class','return','import','from','as','if','elif','else','for','while','in','is','not','and','or','try','except','finally','with','lambda','True','False','None','async','await','yield','raise','pass','break','continue','global','self'],
+    bash: ['pip','pip3','python','python3','export','source','cd','echo','curl','npm','agy','adk','sudo','irm','iex','mkdir','ls','venv','activate','uvicorn'],
+    json: ['true','false','null']
+  };
+  var kws = keywordSets[lang] || keywordSets.python;
+  var kwPattern = kws.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|');
+  var master = new RegExp(
+    '(#.*$)' + '|' +
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')' + '|' +
+    '("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '(\\b(?:' + kwPattern + ')\\b)',
+    'gm'
+  );
+  var out = '', last = 0, m;
+  while ((m = master.exec(code)) !== null){
+    out += escapeHtml(code.slice(last, m.index));
+    if (m[1] !== undefined) out += '<span class="tok-comment">' + escapeHtml(m[1]) + '</span>';
+    else if (m[2] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[2]) + '</span>';
+    else if (m[3] !== undefined) out += '<span class="tok-string">' + escapeHtml(m[3]) + '</span>';
+    else if (m[4] !== undefined) out += '<span class="tok-number">' + escapeHtml(m[4]) + '</span>';
+    else if (m[5] !== undefined) out += '<span class="tok-keyword">' + escapeHtml(m[5]) + '</span>';
+    last = master.lastIndex;
+    if (m[0] === '') master.lastIndex++;
+  }
+  out += escapeHtml(code.slice(last));
+  return out;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('pre code[data-lang]').forEach(function(block){
+    var lang = block.getAttribute('data-lang');
+    block.innerHTML = highlightCode(block.textContent, lang);
+  });
+
+  document.querySelectorAll('.code-block').forEach(function(cb){
+    var btn = cb.querySelector('.copy-btn');
+    var code = cb.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.textContent).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+
+  var tocList = document.getElementById('toc-list');
+  if (tocList){
+    var headers = document.querySelectorAll('main h2, main h3');
+    headers.forEach(function(h, i){
+      if(!h.id){
+        h.id = 'sec-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      }
+      var li = document.createElement('li');
+      if (h.tagName === 'H3') li.className = 'toc-sub';
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  var tocToggle = document.getElementById('toc-toggle');
+  if (tocToggle){
+    tocToggle.addEventListener('click', function(){
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+});
+
+function gradeQuiz(formId){
+  var form = document.getElementById(formId);
+  if(!form) return;
+  var questions = form.querySelectorAll('.quiz-q');
+  var score = 0;
+  questions.forEach(function(q){
+    var correct = q.getAttribute('data-correct');
+    var checked = q.querySelector('input:checked');
+    q.classList.remove('is-correct','is-incorrect','is-unanswered');
+    if(!checked){
+      q.classList.add('is-unanswered');
+    } else if (checked.value === correct){
+      q.classList.add('is-correct');
+      score++;
+    } else {
+      q.classList.add('is-incorrect');
+    }
+    var explain = q.querySelector('.quiz-explain');
+    if (explain) explain.style.display = 'block';
+  });
+  var scoreEl = document.getElementById(formId + '-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + score + ' / ' + questions.length;
+  var summary = document.getElementById(formId + '-summary');
+  if (summary) summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>
