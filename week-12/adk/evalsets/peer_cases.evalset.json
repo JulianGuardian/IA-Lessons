@@ -1,0 +1,75 @@
+{
+  "eval_set_id": "campus_helper_peer_cases_v1",
+  "name": "Campus helper agent peer-written cases",
+  "description": "Activity 3: three realistic questions written from the agent's description only, with predicted trajectories and reference answers.",
+  "eval_cases": [
+    {
+      "eval_id": "multi_tool_week_9_medium",
+      "conversation": [
+        {
+          "invocation_id": "inv-peer-1",
+          "user_content": {
+            "parts": [{"text": "What does week 9 cover, and how many hours should I study it if it's medium difficulty for me?"}],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{"text": "Week 9 covers LangGraph I. At medium difficulty, budget about 4 hours of study."}],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {"name": "get_course_topic", "args": {"week": 9}},
+              {"name": "estimate_study_hours", "args": {"topic": "LangGraph I", "difficulty": "medium"}}
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "campus_helper_agent", "user_id": "test_user", "state": {}}
+    },
+    {
+      "eval_id": "ambiguous_needs_clarification",
+      "conversation": [
+        {
+          "invocation_id": "inv-peer-2",
+          "user_content": {
+            "parts": [{"text": "How long should I study?"}],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{"text": "Which topic or week do you want to study, and how difficult is it for you: easy, medium, or hard?"}],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "campus_helper_agent", "user_id": "test_user", "state": {}}
+    },
+    {
+      "eval_id": "unknown_week_11",
+      "conversation": [
+        {
+          "invocation_id": "inv-peer-3",
+          "user_content": {
+            "parts": [{"text": "What topic is covered in week 11?"}],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{"text": "I don't have a topic registered for week 11 of the course."}],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {"name": "get_course_topic", "args": {"week": 11}}
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "campus_helper_agent", "user_id": "test_user", "state": {}}
+    }
+  ]
+}

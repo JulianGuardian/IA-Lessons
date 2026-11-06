@@ -1,0 +1,53 @@
+{
+  "eval_set_id": "campus_helper_eval_v1",
+  "name": "Campus helper agent smoke tests",
+  "description": "Basic trajectory and response checks for the Week 6 campus helper agent tools.",
+  "eval_cases": [
+    {
+      "eval_id": "topic_lookup_week_7",
+      "conversation": [
+        {
+          "invocation_id": "inv-1",
+          "user_content": {
+            "parts": [{"text": "What topic does week 7 cover?"}],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{"text": "Week 7 covers Google ADK."}],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {"name": "get_course_topic", "args": {"week": 7}}
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "campus_helper_agent", "user_id": "test_user", "state": {}}
+    },
+    {
+      "eval_id": "study_hours_hard_topic",
+      "conversation": [
+        {
+          "invocation_id": "inv-2",
+          "user_content": {
+            "parts": [{"text": "How many hours should I budget to study LangGraph I if it's hard for me?"}],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{"text": "Budget about 7 hours for LangGraph I at hard difficulty."}],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {"name": "estimate_study_hours", "args": {"topic": "LangGraph I", "difficulty": "hard"}}
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {"app_name": "campus_helper_agent", "user_id": "test_user", "state": {}}
+    }
+  ]
+}
